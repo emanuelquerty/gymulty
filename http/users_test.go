@@ -1,6 +1,7 @@
 package http
 
 import (
+	"bytes"
 	"encoding/json"
 	"net/http"
 	"net/http/httptest"
@@ -91,6 +92,39 @@ func TestGetUser(t *testing.T) {
 		}
 	})
 
+}
+
+func TestCreateUser(t *testing.T) {
+	storeData := make(map[int]domain.User)
+	user := domain.User{
+		TenantID:  1,
+		Firstname: "Leny",
+		Lastname:  "Jenkins",
+		Email:     "ljenkins@email.com",
+		Password:  "ReallyStrong21734bs",
+		Role:      "admin",
+	}
+
+	t.Run("returns 201 with newly created user", func(t *testing.T) {
+		bodyBytes, _ := json.Marshal(user)
+		reqBody := bytes.NewBuffer(bodyBytes)
+
+		req := httptest.NewRequest(http.MethodPost, "/api/users", reqBody)
+		res := newUserRequest(storeData, req)
+
+		if got, want := res.Code, 201; got != want {
+			t.Errorf("got %d, want %d", got, want)
+		}
+
+		var got domain.PublicUser
+		json.NewDecoder(res.Body).Decode(&got)
+
+		user.ID = got.ID // user is what we want the server to return on creation, so just update with id
+
+		if want := MapToPublicUser(user); !reflect.DeepEqual(got, want) {
+			t.Errorf("got %+v, want %+v", got, want)
+		}
+	})
 }
 
 func newUserRequest(users map[int]domain.User, req *http.Request) *httptest.ResponseRecorder {
