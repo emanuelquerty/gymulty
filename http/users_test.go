@@ -13,7 +13,26 @@ import (
 )
 
 func TestGetUser(t *testing.T) {
-	t.Run("return user with id 1", func(t *testing.T) {
+
+	t.Run("returns 200 status code for existing user id ", func(t *testing.T) {
+		users := map[int]domain.User{
+			1: {
+				ID:        1,
+				TenantID:  1,
+				Firstname: "Peter",
+				Lastname:  "Petrelli",
+				Role:      "admin",
+			},
+		}
+		req := httptest.NewRequest("GET", "/api/users/1", nil)
+		res := newUserRequest(users, req)
+
+		if got, want := res.Code, 200; got != want {
+			t.Errorf("got %+v, want %+v", got, want)
+		}
+	})
+
+	t.Run("returns user with id 1", func(t *testing.T) {
 		users := map[int]domain.User{
 			1: {
 				ID:        1,
@@ -41,7 +60,7 @@ func TestGetUser(t *testing.T) {
 			t.Errorf("got %+v, want %+v", got, want)
 		}
 	})
-	t.Run("return user with id 2", func(t *testing.T) {
+	t.Run("returns user with id 2", func(t *testing.T) {
 		users := map[int]domain.User{
 			2: {
 				ID:        2,
@@ -70,7 +89,7 @@ func TestGetUser(t *testing.T) {
 		}
 	})
 
-	t.Run("return 404 not found", func(t *testing.T) {
+	t.Run("returns 404 status code", func(t *testing.T) {
 		users := make(map[int]domain.User)
 
 		req := httptest.NewRequest("GET", "/api/users/3", nil)
@@ -81,7 +100,7 @@ func TestGetUser(t *testing.T) {
 		}
 	})
 
-	t.Run("return 400 bad request", func(t *testing.T) {
+	t.Run("returns 400 status code", func(t *testing.T) {
 		users := make(map[int]domain.User)
 
 		req := httptest.NewRequest("GET", "/api/users/notValidID3", nil)
