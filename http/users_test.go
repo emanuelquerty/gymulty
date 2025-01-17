@@ -32,24 +32,24 @@ func TestGetUser(t *testing.T) {
 		}
 	})
 
-	t.Run("returns user with id 1", func(t *testing.T) {
+	t.Run("returns user with id 7", func(t *testing.T) {
 		storeData := map[int]domain.User{
-			1: {
-				ID:        1,
+			7: {
+				ID:        7,
 				TenantID:  1,
 				Firstname: "Peter",
 				Lastname:  "Petrelli",
 				Role:      "admin",
 			},
 		}
-		req := httptest.NewRequest("GET", "/api/users/1", nil)
+		req := httptest.NewRequest("GET", "/api/users/7", nil)
 		res := newUserRequest(storeData, req)
 
 		var got domain.PublicUser
 		json.NewDecoder(res.Body).Decode(&got)
 
 		want := domain.PublicUser{
-			ID:        1,
+			ID:        7,
 			TenantID:  1,
 			Firstname: "Peter",
 			Lastname:  "Petrelli",
@@ -124,7 +124,7 @@ func TestCreateUser(t *testing.T) {
 		Role:      "admin",
 	}
 
-	t.Run("returns 201 with newly created user", func(t *testing.T) {
+	t.Run("returns 201 status code", func(t *testing.T) {
 		bodyBytes, _ := json.Marshal(user)
 		reqBody := bytes.NewBuffer(bodyBytes)
 
@@ -134,11 +134,19 @@ func TestCreateUser(t *testing.T) {
 		if got, want := res.Code, 201; got != want {
 			t.Errorf("got %d, want %d", got, want)
 		}
+	})
+
+	t.Run("returns newly created user", func(t *testing.T) {
+		bodyBytes, _ := json.Marshal(user)
+		reqBody := bytes.NewBuffer(bodyBytes)
+
+		req := httptest.NewRequest(http.MethodPost, "/api/users", reqBody)
+		res := newUserRequest(storeData, req)
 
 		var got domain.PublicUser
 		json.NewDecoder(res.Body).Decode(&got)
 
-		user.ID = got.ID // user is what we want the server to return on creation, so just update with id
+		user.ID = got.ID // update user (want) with new id
 
 		if want := MapToPublicUser(user); !reflect.DeepEqual(got, want) {
 			t.Errorf("got %+v, want %+v", got, want)
