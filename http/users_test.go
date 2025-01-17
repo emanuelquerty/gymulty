@@ -2,7 +2,7 @@ package http
 
 import (
 	"encoding/json"
-	"io"
+	"net/http"
 	"net/http/httptest"
 	"reflect"
 	"testing"
@@ -22,7 +22,8 @@ func TestGetUser(t *testing.T) {
 				Role:      "admin",
 			},
 		}
-		res := newUserRequest(users, "GET", "/api/users/1", nil)
+		req := httptest.NewRequest("GET", "/api/users/1", nil)
+		res := newUserRequest(users, req)
 
 		var got domain.PublicUser
 		json.NewDecoder(res.Body).Decode(&got)
@@ -49,7 +50,8 @@ func TestGetUser(t *testing.T) {
 				Role:      "trainer",
 			},
 		}
-		res := newUserRequest(users, "GET", "/api/users/2", nil)
+		req := httptest.NewRequest("GET", "/api/users/2", nil)
+		res := newUserRequest(users, req)
 
 		var got domain.PublicUser
 		json.NewDecoder(res.Body).Decode(&got)
@@ -69,7 +71,9 @@ func TestGetUser(t *testing.T) {
 
 	t.Run("return 404 not found", func(t *testing.T) {
 		users := make(map[int]domain.User)
-		res := newUserRequest(users, "GET", "/api/users/3", nil)
+
+		req := httptest.NewRequest("GET", "/api/users/3", nil)
+		res := newUserRequest(users, req)
 
 		if got, want := res.Code, 404; got != want {
 			t.Errorf("got %d, want %d", got, want)
@@ -78,7 +82,9 @@ func TestGetUser(t *testing.T) {
 
 	t.Run("return 400 bad request", func(t *testing.T) {
 		users := make(map[int]domain.User)
-		res := newUserRequest(users, "GET", "/api/users/notValidID3", nil)
+
+		req := httptest.NewRequest("GET", "/api/users/notValidID3", nil)
+		res := newUserRequest(users, req)
 
 		if got, want := res.Code, 400; got != want {
 			t.Errorf("got %d, want %d", got, want)
@@ -87,13 +93,11 @@ func TestGetUser(t *testing.T) {
 
 }
 
-func newUserRequest(users map[int]domain.User, method string, url string, body io.Reader) *httptest.ResponseRecorder {
+func newUserRequest(users map[int]domain.User, req *http.Request) *httptest.ResponseRecorder {
 	userStore := mock.NewUserStore(users)
 	userHandler := NewUserHandler(userStore)
 
-	req := httptest.NewRequest(method, url, body)
 	res := httptest.NewRecorder()
-
 	userHandler.ServeHTTP(res, req)
 	return res
 }
