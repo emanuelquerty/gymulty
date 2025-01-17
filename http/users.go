@@ -2,6 +2,7 @@ package http
 
 import (
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"strconv"
 
@@ -60,7 +61,9 @@ func (u *UserHandler) createUser(w http.ResponseWriter, r *http.Request) *appErr
 	}
 
 	publicUser := MapToPublicUser(newUser)
+	resourceURI := fmt.Sprintf("/api/users/%d", publicUser.ID)
 
+	w.Header().Set("Location", resourceURI)
 	w.WriteHeader(201)
 	json.NewEncoder(w).Encode(publicUser)
 	return nil

@@ -125,6 +125,20 @@ func TestCreateUser(t *testing.T) {
 			t.Errorf("got %+v, want %+v", got, want)
 		}
 	})
+
+	t.Run("returns location header with full resource uri", func(t *testing.T) {
+		bodyBytes, _ := json.Marshal(user)
+		reqBody := bytes.NewBuffer(bodyBytes)
+
+		req := httptest.NewRequest(http.MethodPost, "/api/users", reqBody)
+		res := newUserRequest(storeData, req)
+
+		got := res.Header().Get("Location")
+		want := "/api/users/1" // newly created resource always has mocked ID = 1
+		if got != want {
+			t.Errorf("got %+v, want %+v", got, want)
+		}
+	})
 }
 
 func newUserRequest(users map[int]domain.User, req *http.Request) *httptest.ResponseRecorder {
