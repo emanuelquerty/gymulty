@@ -23,9 +23,14 @@ func NewUserHandler(store domain.UserStore) *UserHandler {
 	return userHandler
 }
 
+func (u *UserHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	u.Handler = http.StripPrefix("/api", u.Handler)
+	u.Handler.ServeHTTP(w, r)
+}
+
 func (u *UserHandler) registerRoutes(router *http.ServeMux) {
-	router.Handle("GET /api/users/{id}", errorHandler(u.getUserByID))
-	router.Handle("POST /api/users", errorHandler(u.createUser))
+	router.Handle("GET /users/{id}", errorHandler(u.getUserByID))
+	router.Handle("POST /users", errorHandler(u.createUser))
 }
 
 func (u *UserHandler) getUserByID(w http.ResponseWriter, r *http.Request) *appError {
