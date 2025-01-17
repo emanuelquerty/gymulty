@@ -61,7 +61,7 @@ func (u *UserHandler) createUser(w http.ResponseWriter, r *http.Request) *appErr
 	}
 
 	publicUser := MapToPublicUser(newUser)
-	resourceURI := fmt.Sprintf("/api/users/%d", publicUser.ID)
+	resourceURI := fmt.Sprintf("%s://%s%s/%d", r.URL.Scheme, r.Host, r.URL.String(), publicUser.ID)
 
 	w.Header().Set("Location", resourceURI)
 	w.WriteHeader(201)

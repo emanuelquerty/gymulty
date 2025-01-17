@@ -161,7 +161,7 @@ func TestCreateUser(t *testing.T) {
 		res := newUserRequest(storeData, req)
 
 		got := res.Header().Get("Location")
-		want := "/api/users/1" // newly created resource always has mocked ID = 1
+		want := "://example.com/users/1" // newly created resource always has mocked ID = 1
 		if got != want {
 			t.Errorf("got %+v, want %+v", got, want)
 		}
