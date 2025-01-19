@@ -138,10 +138,10 @@ func TestCreateUser(t *testing.T) {
 		userStore.CreateUserFn = func(user domain.User) (domain.User, error) {
 			return domain.User{}, nil
 		}
-		bodyBytes, _ := json.Marshal(user)
-		reqBody := bytes.NewBuffer(bodyBytes)
+		body, _ := json.Marshal(user)
+		bodyBuff := bytes.NewBuffer(body)
 
-		req := httptest.NewRequest(http.MethodPost, "/api/users", reqBody)
+		req := httptest.NewRequest(http.MethodPost, "/api/users", bodyBuff)
 		res := newUserRequest(userStore, req)
 
 		if got, want := res.Code, 201; got != want {
@@ -155,10 +155,10 @@ func TestCreateUser(t *testing.T) {
 			return user, nil
 		}
 
-		bodyBytes, _ := json.Marshal(user)
-		reqBody := bytes.NewBuffer(bodyBytes)
+		body, _ := json.Marshal(user)
+		bodyBuff := bytes.NewBuffer(body)
 
-		req := httptest.NewRequest(http.MethodPost, "/api/users", reqBody)
+		req := httptest.NewRequest(http.MethodPost, "/api/users", bodyBuff)
 		res := newUserRequest(userStore, req)
 
 		var got domain.PublicUser
@@ -175,10 +175,10 @@ func TestCreateUser(t *testing.T) {
 			return user, nil
 		}
 
-		bodyBytes, _ := json.Marshal(user)
-		reqBody := bytes.NewBuffer(bodyBytes)
+		body, _ := json.Marshal(user)
+		bodyBuff := bytes.NewBuffer(body)
 
-		req := httptest.NewRequest(http.MethodPost, "/api/users", reqBody)
+		req := httptest.NewRequest(http.MethodPost, "/api/users", bodyBuff)
 		res := newUserRequest(userStore, req)
 
 		got := res.Header().Get("Location")
@@ -218,9 +218,9 @@ func TestUpdateUser(t *testing.T) {
 		want.Email = *update.Email
 		want.Role = *update.Role
 
-		bodyBytes, _ := json.Marshal(update)
-		reqBody := bytes.NewBuffer(bodyBytes)
-		req := httptest.NewRequest(http.MethodPut, "/api/users/3", reqBody)
+		body, _ := json.Marshal(update)
+		bodyBuff := bytes.NewBuffer(body)
+		req := httptest.NewRequest(http.MethodPut, "/api/users/3", bodyBuff)
 		res := newUserRequest(userStore, req)
 
 		var got domain.User
