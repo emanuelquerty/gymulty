@@ -1,30 +1,25 @@
 package mock
 
 import (
-	"errors"
-
 	"github.com/emanuelquerty/multency/domain"
 )
 
+var _ domain.UserStore = (*UserStore)(nil)
+
 type UserStore struct {
-	users map[int]domain.User
+	GetUserByIDFn func(id int) (domain.User, error)
+	CreateUserFn  func(user domain.User) (domain.User, error)
+	UpdateUserFn  func(id int, update domain.UserUpdate) (domain.User, error)
 }
 
-func NewUserStore(users map[int]domain.User) *UserStore {
-	return &UserStore{
-		users: users,
-	}
-}
 func (u *UserStore) GetUserByID(id int) (domain.User, error) {
-	user, ok := u.users[id]
-	if !ok {
-		return domain.User{}, errors.New("")
-	}
-	return user, nil
+	return u.GetUserByIDFn(id)
 }
 
 func (u *UserStore) CreateUser(user domain.User) (domain.User, error) {
-	user.ID = 1
-	u.users[1] = user
-	return u.users[1], nil
+	return u.CreateUserFn(user)
+}
+
+func (u *UserStore) UpdateUser(id int, update domain.UserUpdate) (domain.User, error) {
+	return u.UpdateUserFn(id, update)
 }

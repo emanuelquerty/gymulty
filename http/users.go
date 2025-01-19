@@ -31,6 +31,7 @@ func (u *UserHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 func (u *UserHandler) registerRoutes(router *http.ServeMux) {
 	router.Handle("GET /users/{id}", errorHandler(u.getUserByID))
+	router.Handle("PUT /users/{id}", errorHandler(u.updateUser))
 	router.Handle("POST /users", errorHandler(u.createUser))
 }
 
@@ -57,7 +58,7 @@ func (u *UserHandler) createUser(w http.ResponseWriter, r *http.Request) *appErr
 
 	newUser, err := u.store.CreateUser(user)
 	if err != nil {
-		return &appError{Error: err, Message: "could create user", Code: 400}
+		return &appError{Error: err, Message: "could not create user", Code: 500}
 	}
 
 	publicUser := MapToPublicUser(newUser)
@@ -66,6 +67,25 @@ func (u *UserHandler) createUser(w http.ResponseWriter, r *http.Request) *appErr
 	w.Header().Set("Location", resourceURI)
 	w.WriteHeader(201)
 	json.NewEncoder(w).Encode(publicUser)
+	return nil
+}
+
+func (u *UserHandler) updateUser(w http.ResponseWriter, r *http.Request) *appError {
+	idString := r.PathValue("id")
+
+	userID, err := strconv.Atoi(idString)
+	if err != nil {
+		return &appError{Error: err, Message: "malformed url: invalid id", Code: http.StatusBadRequest}
+	}
+
+	var update domain.UserUpdate
+	json.NewDecoder(r.Body).Decode(&update)
+
+	updatedUser, err := u.store.UpdateUser(userID, update)
+	if err != nil {
+		return &appError{Error: err, Message: "could not update user", Code: http.StatusNotFound}
+	}
+	json.NewEncoder(w).Encode(updatedUser)
 	return nil
 }
 
