@@ -33,6 +33,7 @@ func (u *UserHandler) registerRoutes(router *http.ServeMux) {
 	router.Handle("GET /users/{id}", errorHandler(u.getUserByID))
 	router.Handle("PUT /users/{id}", errorHandler(u.updateUser))
 	router.Handle("POST /users", errorHandler(u.createUser))
+	router.Handle("DELETE /users/{id}", errorHandler(u.deleteUserByID))
 }
 
 func (u *UserHandler) getUserByID(w http.ResponseWriter, r *http.Request) *appError {
@@ -91,6 +92,22 @@ func (u *UserHandler) updateUser(w http.ResponseWriter, r *http.Request) *appErr
 		return &appError{Error: err, Message: "could not update user", Code: http.StatusNotFound}
 	}
 	json.NewEncoder(w).Encode(updatedUser)
+	return nil
+}
+
+func (u *UserHandler) deleteUserByID(w http.ResponseWriter, r *http.Request) *appError {
+	idString := r.PathValue("id")
+
+	userID, err := strconv.Atoi(idString)
+	if err != nil {
+		return &appError{Error: err, Message: "malformed url: invalid id", Code: http.StatusBadRequest}
+	}
+
+	err = u.store.DeleteUserByID(userID)
+	if err != nil {
+		return &appError{Error: err, Message: "could not delete user", Code: http.StatusNotFound}
+	}
+	w.WriteHeader(http.StatusNoContent)
 	return nil
 }
 

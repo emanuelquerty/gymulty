@@ -256,6 +256,47 @@ func TestUpdateUser(t *testing.T) {
 
 }
 
+func TestDelete(t *testing.T) {
+	t.Run("returns 204 on success", func(t *testing.T) {
+		req := httptest.NewRequest("DELETE", "/api/users/2", nil)
+		userstore := new(mock.UserStore)
+		userstore.DeleteByIDFn = func(id int) error {
+			return nil
+		}
+
+		res := newUserRequest(userstore, req)
+		got := res.Code
+		want := 204
+		assert.Equal(t, want, got, "status codes should be equal")
+	})
+
+	t.Run("returns 404 for non-existing id", func(t *testing.T) {
+		req := httptest.NewRequest("DELETE", "/api/users/5", nil)
+		userstore := new(mock.UserStore)
+		userstore.DeleteByIDFn = func(id int) error {
+			return errors.New("not found")
+		}
+
+		res := newUserRequest(userstore, req)
+		got := res.Code
+		want := 404
+		assert.Equal(t, want, got, "status codes should be equal")
+	})
+
+	t.Run("returns 400 status code for invalid id", func(t *testing.T) {
+		userStore := new(mock.UserStore)
+		userStore.DeleteByIDFn = func(id int) error {
+			return nil // this func is never called for this test, so return val here is irrelevant
+		}
+		req := httptest.NewRequest("DELETE", "/api/users/InvalidID", nil)
+		res := newUserRequest(userStore, req)
+
+		got := res.Code
+		want := 400
+		assert.Equal(t, want, got, "status codes should be equal")
+	})
+}
+
 func newUserRequest(userStore *mock.UserStore, req *http.Request) *httptest.ResponseRecorder {
 	userHandler := NewUserHandler(userStore)
 	res := httptest.NewRecorder()
