@@ -56,6 +56,11 @@ func (u *UserHandler) createUser(w http.ResponseWriter, r *http.Request) *appErr
 	var user domain.User
 	json.NewDecoder(r.Body).Decode(&user)
 
+	err := user.HashPassword()
+	if err != nil {
+		return &appError{Error: err, Message: "could not create user", Code: 500}
+	}
+
 	newUser, err := u.store.CreateUser(user)
 	if err != nil {
 		return &appError{Error: err, Message: "could not create user", Code: 500}

@@ -2,6 +2,8 @@ package domain
 
 import (
 	"time"
+
+	"golang.org/x/crypto/bcrypt"
 )
 
 type User struct {
@@ -16,6 +18,16 @@ type User struct {
 	UpdatedAt time.Time `json:"updated_at,omitempty"  bson:"updated_at"`
 }
 
+func (u *User) HashPassword() error {
+	password := []byte(u.Password)
+	hash, err := bcrypt.GenerateFromPassword(password, bcrypt.DefaultCost)
+	if err != nil {
+		return err
+	}
+	u.Password = string(hash)
+	return nil
+}
+
 type PublicUser struct {
 	ID        int       `json:"id,omitempty"  bson:"id"`
 	TenantID  int       `json:"tenant_id,omitempty"  bson:"tenant_id"`
@@ -26,10 +38,8 @@ type PublicUser struct {
 	UpdatedAt time.Time `json:"updated_at,omitempty"  bson:"updated_at"`
 }
 
-// UserUpdates contains all fields the user can manually update
-// All fields are nil to make it easy to mass update
-// Fields not nil are updated through reflection
-// this makes it easy to update 1 or more fields at once
+// UserUpdates enables user to update one or more fields
+// fields not nil are updated
 type UserUpdate struct {
 	Firstname *string `json:"firstname,omitempty"  bson:"firstname"`
 	Lastname  *string `json:"lastname,omitempty"  bson:"lastname"`
