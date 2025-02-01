@@ -35,6 +35,7 @@ func (u *UserHandler) registerRoutes(router *http.ServeMux) {
 
 	router.Handle("PUT /tenants/{tenantID}/users/{userID}", errorHandler(u.updateUser))
 	router.Handle("DELETE /tenants/{tenantID}/users/{userID}", errorHandler(u.deleteUserByID))
+	router.Handle("GET /tenants/{tenantID}/users", errorHandler(u.getAllUsers))
 }
 
 func (u *UserHandler) getUserByID(w http.ResponseWriter, r *http.Request) *appError {
@@ -133,6 +134,32 @@ func (u *UserHandler) deleteUserByID(w http.ResponseWriter, r *http.Request) *ap
 		return &appError{Error: err, Message: "could not delete user", Code: http.StatusNotFound}
 	}
 	w.WriteHeader(http.StatusNoContent)
+	return nil
+}
+
+func (u *UserHandler) getAllUsers(w http.ResponseWriter, r *http.Request) *appError {
+	tID := r.PathValue("tenantID")
+
+	tenantID, err := strconv.Atoi(tID)
+	if err != nil {
+		return &appError{Error: err, Message: "malformed url: invalid tenant id", Code: http.StatusBadRequest}
+	}
+
+	users, err := u.store.GetAllUsers(tenantID)
+	if err != nil {
+		return &appError{Error: err, Message: "could not retrieve users", Code: http.StatusNotFound}
+	}
+
+	userCount := len(users)
+	res := struct {
+		Message string
+		Users   []domain.User
+	}{
+		Message: fmt.Sprintf("found %d users", userCount),
+		Users:   users,
+	}
+
+	json.NewEncoder(w).Encode(res)
 	return nil
 }
 

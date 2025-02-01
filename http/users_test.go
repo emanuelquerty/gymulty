@@ -282,6 +282,44 @@ func TestDelete(t *testing.T) {
 	})
 }
 
+func TestGetAllUsers(t *testing.T) {
+	users := []domain.User{
+		{
+			ID:        1,
+			FirstName: "Leny",
+			LastName:  "Jenkins",
+			Email:     "ljenkins@email.com",
+			Password:  "ReallyStrong21734bs",
+			Role:      "admin",
+		},
+	}
+
+	t.Run("returns all users on success given tenantID", func(t *testing.T) {
+		userStore := new(mock.UserStore)
+		userStore.GetAllUsersFn = func(tenantID int) ([]domain.User, error) {
+			return users, nil
+		}
+
+		req := httptest.NewRequest("GET", "/api/tenants/1/users", nil)
+		res := newUserRequest(userStore, req)
+
+		type response struct {
+			Message string
+			Users   []domain.User
+		}
+
+		var got response
+		json.NewDecoder(res.Body).Decode(&got)
+
+		want := response{
+			Message: "found 1 users",
+			Users:   users,
+		}
+
+		assert.Equal(t, want, got, "responses should match")
+	})
+}
+
 func newUserRequest(userStore *mock.UserStore, req *http.Request) *httptest.ResponseRecorder {
 	userHandler := NewUserHandler(userStore)
 	res := httptest.NewRecorder()
