@@ -27,7 +27,7 @@ func TestCreateTenant(t *testing.T) {
 
 	t.Run("returns newly created tenant on success", func(t *testing.T) {
 		userStore := new(mock.UserStore)
-		userStore.CreateUserFn = func(data domain.User) (domain.User, error) {
+		userStore.CreateUserFn = func(tenantID int, data domain.User) (domain.User, error) {
 			data.ID = 1
 			return data, nil
 		}

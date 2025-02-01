@@ -55,7 +55,7 @@ func (t *TenantHandler) createTenant(w http.ResponseWriter, r *http.Request) *ap
 		return &appError{Error: err, Message: "could not create user", Code: http.StatusInternalServerError}
 	}
 
-	newUser, err := t.userStore.CreateUser(user)
+	newUser, err := t.userStore.CreateUser(newTenant.ID, user)
 	if err != nil {
 		return &appError{Error: err, Message: "could not create user", Code: http.StatusBadRequest}
 	}

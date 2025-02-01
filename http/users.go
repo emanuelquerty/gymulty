@@ -31,10 +31,9 @@ func (u *UserHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 func (u *UserHandler) registerRoutes(router *http.ServeMux) {
 	router.Handle("GET /tenants/{tenantID}/users/{userID}", errorHandler(u.getUserByID))
+	router.Handle("POST /tenants/{tenantID}/users", errorHandler(u.createUser))
 
-	// router.Handle("GET users/{id}", errorHandler(u.getUserByID))
 	router.Handle("PUT /users/{id}", errorHandler(u.updateUser))
-	router.Handle("POST /users", errorHandler(u.createUser))
 	router.Handle("DELETE /users/{id}", errorHandler(u.deleteUserByID))
 }
 
@@ -62,15 +61,21 @@ func (u *UserHandler) getUserByID(w http.ResponseWriter, r *http.Request) *appEr
 }
 
 func (u *UserHandler) createUser(w http.ResponseWriter, r *http.Request) *appError {
+	tID := r.PathValue("tenantID")
+	tenantID, err := strconv.Atoi(tID)
+	if err != nil {
+		return &appError{Error: err, Message: "malformed url: invalid tenant id", Code: http.StatusBadRequest}
+	}
+
 	var user domain.User
 	json.NewDecoder(r.Body).Decode(&user)
 
-	err := user.HashPassword()
+	err = user.HashPassword()
 	if err != nil {
 		return &appError{Error: err, Message: "could not create user", Code: 500}
 	}
 
-	newUser, err := u.store.CreateUser(user)
+	newUser, err := u.store.CreateUser(tenantID, user)
 	if err != nil {
 		return &appError{Error: err, Message: "could not create user", Code: 500}
 	}

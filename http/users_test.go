@@ -115,7 +115,6 @@ func TestGetUser(t *testing.T) {
 func TestCreateUser(t *testing.T) {
 	user := domain.User{
 		ID:        1,
-		TenantID:  1,
 		FirstName: "Leny",
 		LastName:  "Jenkins",
 		Email:     "ljenkins@email.com",
@@ -125,13 +124,13 @@ func TestCreateUser(t *testing.T) {
 
 	t.Run("returns 201 status code", func(t *testing.T) {
 		userStore := new(mock.UserStore)
-		userStore.CreateUserFn = func(user domain.User) (domain.User, error) {
+		userStore.CreateUserFn = func(tenantID int, user domain.User) (domain.User, error) {
 			return domain.User{}, nil
 		}
 		body, _ := json.Marshal(user)
 		bodyBuff := bytes.NewBuffer(body)
 
-		req := httptest.NewRequest(http.MethodPost, "/api/users", bodyBuff)
+		req := httptest.NewRequest(http.MethodPost, "/api/tenants/1/users", bodyBuff)
 		res := newUserRequest(userStore, req)
 
 		got, want := res.Code, 201
@@ -140,14 +139,14 @@ func TestCreateUser(t *testing.T) {
 
 	t.Run("returns newly created user", func(t *testing.T) {
 		userStore := new(mock.UserStore)
-		userStore.CreateUserFn = func(user domain.User) (domain.User, error) {
+		userStore.CreateUserFn = func(tenantID int, user domain.User) (domain.User, error) {
 			return user, nil
 		}
 
 		body, _ := json.Marshal(user)
 		bodyBuff := bytes.NewBuffer(body)
 
-		req := httptest.NewRequest(http.MethodPost, "/api/users", bodyBuff)
+		req := httptest.NewRequest(http.MethodPost, "/api/tenants/1/users", bodyBuff)
 		res := newUserRequest(userStore, req)
 
 		var got domain.PublicUser
@@ -159,18 +158,18 @@ func TestCreateUser(t *testing.T) {
 
 	t.Run("returns location header with full resource uri", func(t *testing.T) {
 		userStore := new(mock.UserStore)
-		userStore.CreateUserFn = func(user domain.User) (domain.User, error) {
+		userStore.CreateUserFn = func(tenantID int, user domain.User) (domain.User, error) {
 			return user, nil
 		}
 
 		body, _ := json.Marshal(user)
 		bodyBuff := bytes.NewBuffer(body)
 
-		req := httptest.NewRequest(http.MethodPost, "/api/users", bodyBuff)
+		req := httptest.NewRequest(http.MethodPost, "/api/tenants/1/users", bodyBuff)
 		res := newUserRequest(userStore, req)
 
 		got := res.Header().Get("Location")
-		want := "://example.com/users/1" // newly created resource always has mocked ID = 1
+		want := "://example.com/tenants/1/users/1" // newly created resource always has mocked ID = 1
 		assert.Equal(t, want, got, "urls should be equal")
 	})
 }
