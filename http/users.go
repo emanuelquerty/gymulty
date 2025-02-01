@@ -34,7 +34,7 @@ func (u *UserHandler) registerRoutes(router *http.ServeMux) {
 	router.Handle("POST /tenants/{tenantID}/users", errorHandler(u.createUser))
 
 	router.Handle("PUT /tenants/{tenantID}/users/{userID}", errorHandler(u.updateUser))
-	router.Handle("DELETE /users/{id}", errorHandler(u.deleteUserByID))
+	router.Handle("DELETE /tenants/{tenantID}/users/{userID}", errorHandler(u.deleteUserByID))
 }
 
 func (u *UserHandler) getUserByID(w http.ResponseWriter, r *http.Request) *appError {
@@ -115,14 +115,20 @@ func (u *UserHandler) updateUser(w http.ResponseWriter, r *http.Request) *appErr
 }
 
 func (u *UserHandler) deleteUserByID(w http.ResponseWriter, r *http.Request) *appError {
-	idString := r.PathValue("id")
+	tID := r.PathValue("tenantID")
+	uID := r.PathValue("userID")
 
-	userID, err := strconv.Atoi(idString)
+	userID, err := strconv.Atoi(uID)
 	if err != nil {
-		return &appError{Error: err, Message: "malformed url: invalid id", Code: http.StatusBadRequest}
+		return &appError{Error: err, Message: "malformed url: invalid user id", Code: http.StatusBadRequest}
 	}
 
-	err = u.store.DeleteUserByID(userID)
+	tenantID, err := strconv.Atoi(tID)
+	if err != nil {
+		return &appError{Error: err, Message: "malformed url: invalid tenant id", Code: http.StatusBadRequest}
+	}
+
+	err = u.store.DeleteUserByID(tenantID, userID)
 	if err != nil {
 		return &appError{Error: err, Message: "could not delete user", Code: http.StatusNotFound}
 	}

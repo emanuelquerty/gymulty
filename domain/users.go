@@ -52,5 +52,5 @@ type UserStore interface {
 	GetUserByID(tenantID int, userID int) (User, error)
 	CreateUser(tenantID int, user User) (User, error)
 	UpdateUser(tenantID int, userID int, updates UserUpdate) (User, error)
-	DeleteUserByID(id int) error
+	DeleteUserByID(tenantID int, userID int) error
 }
