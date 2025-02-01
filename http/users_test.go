@@ -24,10 +24,10 @@ func TestGetUser(t *testing.T) {
 
 	t.Run("returns 200 status code for existing user id ", func(t *testing.T) {
 		userStore := new(mock.UserStore)
-		userStore.GetUserByIDFn = func(id int) (domain.User, error) {
+		userStore.GetUserByIDFn = func(tenantID int, userID int) (domain.User, error) {
 			return user, nil
 		}
-		req := httptest.NewRequest("GET", "/api/users/1", nil)
+		req := httptest.NewRequest("GET", "/api/tenants/1/users/1", nil)
 		res := newUserRequest(userStore, req)
 
 		got, want := res.Code, 200
@@ -36,12 +36,12 @@ func TestGetUser(t *testing.T) {
 
 	t.Run("returns user with id 7", func(t *testing.T) {
 		userStore := new(mock.UserStore)
-		userStore.GetUserByIDFn = func(id int) (domain.User, error) {
+		userStore.GetUserByIDFn = func(tenantID int, userID int) (domain.User, error) {
 			found := user
 			found.ID = 7
 			return found, nil
 		}
-		req := httptest.NewRequest("GET", "/api/users/7", nil)
+		req := httptest.NewRequest("GET", "/api/tenants/1/users/7", nil)
 		res := newUserRequest(userStore, req)
 
 		var got domain.PublicUser
@@ -65,10 +65,10 @@ func TestGetUser(t *testing.T) {
 			Role:      "trainer",
 		}
 		userStore := new(mock.UserStore)
-		userStore.GetUserByIDFn = func(id int) (domain.User, error) {
+		userStore.GetUserByIDFn = func(tenantID int, userID int) (domain.User, error) {
 			return user, nil
 		}
-		req := httptest.NewRequest("GET", "/api/users/2", nil)
+		req := httptest.NewRequest("GET", "/api/tenants/1/users/2", nil)
 		res := newUserRequest(userStore, req)
 
 		var got domain.PublicUser
@@ -86,11 +86,11 @@ func TestGetUser(t *testing.T) {
 
 	t.Run("returns 404 status code for non-existing user id", func(t *testing.T) {
 		userStore := new(mock.UserStore)
-		userStore.GetUserByIDFn = func(id int) (domain.User, error) {
+		userStore.GetUserByIDFn = func(tenantID int, userID int) (domain.User, error) {
 			return domain.User{}, errors.New("not found")
 		}
 
-		req := httptest.NewRequest("GET", "/api/users/3", nil)
+		req := httptest.NewRequest("GET", "/api/tenants/1/users/3", nil)
 		res := newUserRequest(userStore, req)
 
 		got, want := res.Code, 404
@@ -99,11 +99,11 @@ func TestGetUser(t *testing.T) {
 
 	t.Run("returns 400 status code for invalid user id", func(t *testing.T) {
 		userStore := new(mock.UserStore)
-		userStore.GetUserByIDFn = func(id int) (domain.User, error) {
+		userStore.GetUserByIDFn = func(tenantID int, userID int) (domain.User, error) {
 			return domain.User{}, nil
 		}
 
-		req := httptest.NewRequest("GET", "/api/users/notValidID3", nil)
+		req := httptest.NewRequest("GET", "/api/tenants/1/users/notValidID3", nil)
 		res := newUserRequest(userStore, req)
 
 		got, want := res.Code, 400

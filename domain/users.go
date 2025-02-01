@@ -49,7 +49,7 @@ type UserUpdate struct {
 }
 
 type UserStore interface {
-	GetUserByID(id int) (User, error)
+	GetUserByID(tenantID int, userID int) (User, error)
 	CreateUser(user User) (User, error)
 	UpdateUser(id int, updates UserUpdate) (User, error)
 	DeleteUserByID(id int) error

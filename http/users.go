@@ -30,21 +30,29 @@ func (u *UserHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 }
 
 func (u *UserHandler) registerRoutes(router *http.ServeMux) {
-	router.Handle("GET /users/{id}", errorHandler(u.getUserByID))
+	router.Handle("GET /tenants/{tenantID}/users/{userID}", errorHandler(u.getUserByID))
+
+	// router.Handle("GET users/{id}", errorHandler(u.getUserByID))
 	router.Handle("PUT /users/{id}", errorHandler(u.updateUser))
 	router.Handle("POST /users", errorHandler(u.createUser))
 	router.Handle("DELETE /users/{id}", errorHandler(u.deleteUserByID))
 }
 
 func (u *UserHandler) getUserByID(w http.ResponseWriter, r *http.Request) *appError {
-	idString := r.PathValue("id")
+	tID := r.PathValue("tenantID")
+	uID := r.PathValue("userID")
 
-	id, err := strconv.Atoi(idString)
+	userID, err := strconv.Atoi(uID)
 	if err != nil {
-		return &appError{Error: err, Message: "malformed url: invalid id", Code: http.StatusBadRequest}
+		return &appError{Error: err, Message: "malformed url: invalid user id", Code: http.StatusBadRequest}
 	}
 
-	user, err := u.store.GetUserByID(id)
+	tenantID, err := strconv.Atoi(tID)
+	if err != nil {
+		return &appError{Error: err, Message: "malformed url: invalid tenant id", Code: http.StatusBadRequest}
+	}
+
+	user, err := u.store.GetUserByID(tenantID, userID)
 	if err != nil {
 		return &appError{Error: err, Message: "user was not found", Code: http.StatusNotFound}
 	}
