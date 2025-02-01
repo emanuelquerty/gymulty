@@ -115,8 +115,8 @@ func MapToPublicUser(user domain.User) domain.PublicUser {
 	return domain.PublicUser{
 		ID:        user.ID,
 		TenantID:  user.TenantID,
-		Firstname: user.Firstname,
-		Lastname:  user.Lastname,
+		FirstName: user.FirstName,
+		LastName:  user.LastName,
 		Role:      user.Role,
 	}
 }

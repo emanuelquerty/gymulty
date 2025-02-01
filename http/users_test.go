@@ -17,8 +17,8 @@ func TestGetUser(t *testing.T) {
 	user := domain.User{
 		ID:        1,
 		TenantID:  1,
-		Firstname: "Peter",
-		Lastname:  "Petrelli",
+		FirstName: "Peter",
+		LastName:  "Petrelli",
 		Role:      "admin",
 	}
 
@@ -50,8 +50,8 @@ func TestGetUser(t *testing.T) {
 		want := domain.PublicUser{
 			ID:        7,
 			TenantID:  1,
-			Firstname: "Peter",
-			Lastname:  "Petrelli",
+			FirstName: "Peter",
+			LastName:  "Petrelli",
 			Role:      "admin",
 		}
 		assert.Equal(t, want, got, "users should be equal")
@@ -60,8 +60,8 @@ func TestGetUser(t *testing.T) {
 		user := domain.User{
 			ID:        2,
 			TenantID:  1,
-			Firstname: "Bruce",
-			Lastname:  "Banner",
+			FirstName: "Bruce",
+			LastName:  "Banner",
 			Role:      "trainer",
 		}
 		userStore := new(mock.UserStore)
@@ -77,8 +77,8 @@ func TestGetUser(t *testing.T) {
 		want := domain.PublicUser{
 			ID:        2,
 			TenantID:  1,
-			Firstname: "Bruce",
-			Lastname:  "Banner",
+			FirstName: "Bruce",
+			LastName:  "Banner",
 			Role:      "trainer",
 		}
 		assert.Equal(t, want, got, "users should be equal")
@@ -116,8 +116,8 @@ func TestCreateUser(t *testing.T) {
 	user := domain.User{
 		ID:        1,
 		TenantID:  1,
-		Firstname: "Leny",
-		Lastname:  "Jenkins",
+		FirstName: "Leny",
+		LastName:  "Jenkins",
 		Email:     "ljenkins@email.com",
 		Password:  "ReallyStrong21734bs",
 		Role:      "admin",
@@ -179,8 +179,8 @@ func TestUpdateUser(t *testing.T) {
 	user := domain.User{
 		ID:        3,
 		TenantID:  1,
-		Firstname: "Johnny",
-		Lastname:  "Presley",
+		FirstName: "Johnny",
+		LastName:  "Presley",
 		Email:     "jpres@email.com",
 		Password:  "Very12SecuryPassword3245",
 		Role:      "member",

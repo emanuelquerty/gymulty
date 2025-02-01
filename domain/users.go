@@ -9,8 +9,8 @@ import (
 type User struct {
 	ID        int       `json:"id,omitempty"  bson:"id"`
 	TenantID  int       `json:"tenant_id,omitempty"  bson:"tenant_id"`
-	Firstname string    `json:"firstname,omitempty"  bson:"firstname"`
-	Lastname  string    `json:"lastname,omitempty"  bson:"lastname"`
+	FirstName string    `json:"first_name,omitempty"  bson:"firstname"`
+	LastName  string    `json:"last_name,omitempty"  bson:"lastname"`
 	Email     string    `json:"email,omitempty"  bson:"email"`
 	Password  string    `json:"password,omitempty"  bson:"password"`
 	Role      string    `json:"role,omitempty"  bson:"role"`
@@ -31,8 +31,8 @@ func (u *User) HashPassword() error {
 type PublicUser struct {
 	ID        int       `json:"id,omitempty"  bson:"id"`
 	TenantID  int       `json:"tenant_id,omitempty"  bson:"tenant_id"`
-	Firstname string    `json:"firstname,omitempty"  bson:"firstname"`
-	Lastname  string    `json:"lastname,omitempty"  bson:"lastname"`
+	FirstName string    `json:"first_name,omitempty"  bson:"firstname"`
+	LastName  string    `json:"last_name,omitempty"  bson:"lastname"`
 	Role      string    `json:"role,omitempty"  bson:"role"`
 	CreatedAt time.Time `json:"created_at,omitempty"  bson:"created_at"`
 	UpdatedAt time.Time `json:"updated_at,omitempty"  bson:"updated_at"`
