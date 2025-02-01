@@ -33,7 +33,7 @@ func (u *UserHandler) registerRoutes(router *http.ServeMux) {
 	router.Handle("GET /tenants/{tenantID}/users/{userID}", errorHandler(u.getUserByID))
 	router.Handle("POST /tenants/{tenantID}/users", errorHandler(u.createUser))
 
-	router.Handle("PUT /users/{id}", errorHandler(u.updateUser))
+	router.Handle("PUT /tenants/{tenantID}/users/{userID}", errorHandler(u.updateUser))
 	router.Handle("DELETE /users/{id}", errorHandler(u.deleteUserByID))
 }
 
@@ -90,17 +90,23 @@ func (u *UserHandler) createUser(w http.ResponseWriter, r *http.Request) *appErr
 }
 
 func (u *UserHandler) updateUser(w http.ResponseWriter, r *http.Request) *appError {
-	idString := r.PathValue("id")
+	tID := r.PathValue("tenantID")
+	uID := r.PathValue("userID")
 
-	userID, err := strconv.Atoi(idString)
+	userID, err := strconv.Atoi(uID)
 	if err != nil {
-		return &appError{Error: err, Message: "malformed url: invalid id", Code: http.StatusBadRequest}
+		return &appError{Error: err, Message: "malformed url: invalid user id", Code: http.StatusBadRequest}
+	}
+
+	tenantID, err := strconv.Atoi(tID)
+	if err != nil {
+		return &appError{Error: err, Message: "malformed url: invalid tenant id", Code: http.StatusBadRequest}
 	}
 
 	var update domain.UserUpdate
 	json.NewDecoder(r.Body).Decode(&update)
 
-	updatedUser, err := u.store.UpdateUser(userID, update)
+	updatedUser, err := u.store.UpdateUser(tenantID, userID, update)
 	if err != nil {
 		return &appError{Error: err, Message: "could not update user", Code: http.StatusNotFound}
 	}

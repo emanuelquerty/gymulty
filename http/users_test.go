@@ -193,7 +193,7 @@ func TestUpdateUser(t *testing.T) {
 			Role:  &newRole,
 		}
 		userStore := new(mock.UserStore)
-		userStore.UpdateUserFn = func(id int, update domain.UserUpdate) (domain.User, error) {
+		userStore.UpdateUserFn = func(tenantID int, userID int, update domain.UserUpdate) (domain.User, error) {
 			updatedUser := user
 			updatedUser.Email = *update.Email
 			updatedUser.Role = *update.Role
@@ -205,7 +205,7 @@ func TestUpdateUser(t *testing.T) {
 
 		body, _ := json.Marshal(update)
 		bodyBuff := bytes.NewBuffer(body)
-		req := httptest.NewRequest(http.MethodPut, "/api/users/3", bodyBuff)
+		req := httptest.NewRequest(http.MethodPut, "/api/tenants/1/users/3", bodyBuff)
 		res := newUserRequest(userStore, req)
 
 		var got domain.User
@@ -215,10 +215,10 @@ func TestUpdateUser(t *testing.T) {
 
 	t.Run("returns 400 status code for invalid id", func(t *testing.T) {
 		userStore := new(mock.UserStore)
-		userStore.UpdateUserFn = func(id int, update domain.UserUpdate) (domain.User, error) {
+		userStore.UpdateUserFn = func(tenantID int, userID int, update domain.UserUpdate) (domain.User, error) {
 			return domain.User{}, nil
 		}
-		req := httptest.NewRequest("PUT", "/api/users/notValidID8", nil)
+		req := httptest.NewRequest("PUT", "/api/tenants/1/users/notValidID8", nil)
 		res := newUserRequest(userStore, req)
 
 		got := res.Code
@@ -228,10 +228,10 @@ func TestUpdateUser(t *testing.T) {
 
 	t.Run("returns 404 status code for non-existing user id", func(t *testing.T) {
 		userStore := new(mock.UserStore)
-		userStore.UpdateUserFn = func(id int, update domain.UserUpdate) (domain.User, error) {
+		userStore.UpdateUserFn = func(tenantID int, userID int, update domain.UserUpdate) (domain.User, error) {
 			return domain.User{}, errors.New("not found")
 		}
-		req := httptest.NewRequest("PUT", "/api/users/27", nil)
+		req := httptest.NewRequest("PUT", "/api/tenants/1/users/27", nil)
 		res := newUserRequest(userStore, req)
 
 		got := res.Code

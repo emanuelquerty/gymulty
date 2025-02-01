@@ -9,7 +9,7 @@ var _ domain.UserStore = (*UserStore)(nil)
 type UserStore struct {
 	GetUserByIDFn func(tenantID int, userID int) (domain.User, error)
 	CreateUserFn  func(tenantID int, user domain.User) (domain.User, error)
-	UpdateUserFn  func(id int, update domain.UserUpdate) (domain.User, error)
+	UpdateUserFn  func(tenantID int, userID int, update domain.UserUpdate) (domain.User, error)
 	DeleteByIDFn  func(id int) error
 }
 
@@ -21,8 +21,8 @@ func (u *UserStore) CreateUser(tenantID int, user domain.User) (domain.User, err
 	return u.CreateUserFn(tenantID, user)
 }
 
-func (u *UserStore) UpdateUser(id int, update domain.UserUpdate) (domain.User, error) {
-	return u.UpdateUserFn(id, update)
+func (u *UserStore) UpdateUser(tenantID int, userID int, update domain.UserUpdate) (domain.User, error) {
+	return u.UpdateUserFn(tenantID, userID, update)
 }
 
 func (u *UserStore) DeleteUserByID(id int) error {
