@@ -15,7 +15,7 @@ import (
 )
 
 func TestCreateTenant(t *testing.T) {
-	body := domain.TenantBody{
+	body := domain.TenantRequestBody{
 		BusinessName: "SwoleGym",
 		Subdomain:    "swolegym",
 		FirstName:    "Peter",

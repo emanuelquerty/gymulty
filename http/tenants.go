@@ -36,7 +36,7 @@ func (t *TenantHandler) registerRoutes(router *http.ServeMux) {
 }
 
 func (t *TenantHandler) createTenant(w http.ResponseWriter, r *http.Request) *appError {
-	var body domain.TenantBody
+	var body domain.TenantRequestBody
 	json.NewDecoder(r.Body).Decode(&body)
 
 	tenant := domain.Tenant{

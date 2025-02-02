@@ -14,7 +14,7 @@ type Tenant struct {
 	UpdatedAt    time.Time
 }
 
-type TenantBody struct {
+type TenantRequestBody struct {
 	BusinessName string `json:"business_name,omitempty"  bson:"business_name"`
 	Subdomain    string `json:"subdomain,omitempty"  bson:"subdomain"`
 	FirstName    string `json:"first_name,omitempty"  bson:"first_name"`
