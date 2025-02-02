@@ -1,7 +1,6 @@
 package main
 
 import (
-	"log"
 	"log/slog"
 	"os"
 
@@ -10,16 +9,18 @@ import (
 )
 
 func main() {
-	dsn := "postgres://postgres:lealdade@localhost:5432/multency"
+	logger := slog.New(slog.NewTextHandler(os.Stdout, nil))
+	slog.SetDefault(logger)
+
+	dsn := "postgres://postgres:lealdade@localhost:5432/multenc"
 	conn, err := postgres.Connect(dsn)
 	if err != nil {
-		log.Fatal(err)
+		logger.Error(err.Error())
+		os.Exit(1)
 	}
-
-	logger := slog.New(slog.NewTextHandler(os.Stdout, nil))
 
 	server := http.NewServer(conn, logger)
 	if err = server.ListenAndServe("8080"); err != nil {
-		log.Fatal(err)
+		logger.Error(err.Error())
 	}
 }
