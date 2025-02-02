@@ -7,6 +7,8 @@ import (
 	"github.com/jackc/pgx/v5"
 )
 
+var _ domain.TenantStore = (*TenantStore)(nil)
+
 type TenantStore struct {
 	conn *pgx.Conn
 }

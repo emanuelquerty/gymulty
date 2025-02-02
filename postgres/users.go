@@ -8,6 +8,8 @@ import (
 	"github.com/jackc/pgx/v5"
 )
 
+var _ domain.UserStore = (*UserStore)(nil)
+
 type UserStore struct {
 	conn *pgx.Conn
 }
