@@ -2,6 +2,7 @@ package http
 
 import (
 	"encoding/json"
+	"log/slog"
 	"net/http"
 
 	"github.com/emanuelquerty/multency/domain"
@@ -11,14 +12,16 @@ type TenantHandler struct {
 	tenantStore domain.TenantStore
 	userStore   domain.UserStore
 	http.Handler
+	logger *slog.Logger
 }
 
-func NewTenantHandler(tenantStore domain.TenantStore, userStore domain.UserStore) *TenantHandler {
+func NewTenantHandler(logger *slog.Logger, tenantStore domain.TenantStore, userStore domain.UserStore) *TenantHandler {
 	router := http.NewServeMux()
 	handler := &TenantHandler{
 		tenantStore: tenantStore,
 		userStore:   userStore,
 		Handler:     router,
+		logger:      logger,
 	}
 
 	handler.registerRoutes(router)
@@ -26,7 +29,7 @@ func NewTenantHandler(tenantStore domain.TenantStore, userStore domain.UserStore
 }
 
 func (t *TenantHandler) registerRoutes(router *http.ServeMux) {
-	userHandler := NewUserHandler(t.userStore)
+	userHandler := NewUserHandler(t.logger, t.userStore)
 
 	router.Handle("POST /api/tenants/signup", errorHandler(t.createTenant))
 	router.Handle("/api/tenants/{tenantID}/", userHandler)
@@ -42,7 +45,7 @@ func (t *TenantHandler) createTenant(w http.ResponseWriter, r *http.Request) *ap
 	}
 	newTenant, err := t.tenantStore.CreateTenant(r.Context(), tenant)
 	if err != nil {
-		return &appError{Error: err, Message: "could not create tenant", Code: http.StatusBadRequest}
+		return &appError{Error: err, Message: "could not create tenant", Code: 400, Logger: t.logger}
 	}
 
 	user := domain.User{
@@ -55,12 +58,12 @@ func (t *TenantHandler) createTenant(w http.ResponseWriter, r *http.Request) *ap
 	}
 	err = user.HashPassword()
 	if err != nil {
-		return &appError{Error: err, Message: "could not create tenant", Code: http.StatusInternalServerError}
+		return &appError{Error: err, Message: "could not create tenant", Code: 500, Logger: t.logger}
 	}
 
 	newUser, err := t.userStore.CreateUser(r.Context(), newTenant.ID, user)
 	if err != nil {
-		return &appError{Error: err, Message: "could not create user for given tenant", Code: http.StatusBadRequest}
+		return &appError{Error: err, Message: "could not create user for given tenant", Code: 400, Logger: t.logger}
 	}
 
 	res := TenantSignupResponse{

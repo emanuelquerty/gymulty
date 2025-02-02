@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
+	"log/slog"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -65,7 +66,7 @@ func TestCreateTenant(t *testing.T) {
 }
 
 func newTenantRequest(tenantStore *mock.TenantStore, userstore *mock.UserStore, req *http.Request) *httptest.ResponseRecorder {
-	handler := NewTenantHandler(tenantStore, userstore)
+	handler := NewTenantHandler(slog.Default(), tenantStore, userstore)
 	res := httptest.NewRecorder()
 	handler.ServeHTTP(res, req)
 	return res

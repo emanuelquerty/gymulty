@@ -2,6 +2,7 @@ package http
 
 import (
 	"fmt"
+	"log/slog"
 	"net/http"
 
 	"github.com/emanuelquerty/multency/postgres"
@@ -11,19 +12,21 @@ import (
 type Server struct {
 	tenantHandler TenantHandler
 	router        http.Handler
+	logger        *slog.Logger
 }
 
-func NewServer(conn *pgx.Conn) *Server {
+func NewServer(conn *pgx.Conn, logger *slog.Logger) *Server {
 	tenantStore := postgres.NewTenantStore(conn)
 	userStore := postgres.NewUserStore(conn)
 
-	tenantHandler := NewTenantHandler(tenantStore, userStore)
+	tenantHandler := NewTenantHandler(logger, tenantStore, userStore)
 
 	router := http.NewServeMux()
 
 	server := &Server{
 		tenantHandler: *tenantHandler,
 		router:        router,
+		logger:        logger,
 	}
 
 	server.registerRoutes(router)

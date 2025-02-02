@@ -2,6 +2,8 @@ package main
 
 import (
 	"log"
+	"log/slog"
+	"os"
 
 	"github.com/emanuelquerty/multency/http"
 	"github.com/emanuelquerty/multency/postgres"
@@ -14,7 +16,9 @@ func main() {
 		log.Fatal(err)
 	}
 
-	server := http.NewServer(conn)
+	logger := slog.New(slog.NewTextHandler(os.Stdout, nil))
+
+	server := http.NewServer(conn, logger)
 	err = server.ListenAndServe("8080")
 	if err != nil {
 		log.Fatal(err)

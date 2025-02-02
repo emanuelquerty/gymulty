@@ -5,6 +5,7 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"log/slog"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -322,7 +323,7 @@ func TestGetAllUsers(t *testing.T) {
 }
 
 func newUserRequest(userStore *mock.UserStore, req *http.Request) *httptest.ResponseRecorder {
-	userHandler := NewUserHandler(userStore)
+	userHandler := NewUserHandler(slog.Default(), userStore)
 	res := httptest.NewRecorder()
 	userHandler.ServeHTTP(res, req)
 	return res
