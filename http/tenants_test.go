@@ -49,7 +49,7 @@ func TestCreateTenant(t *testing.T) {
 				BusinessName: body.BusinessName,
 				Subdomain:    body.Subdomain,
 			},
-			User: domain.PublicUser{
+			Admin: domain.PublicUser{
 				ID:        1,
 				TenantID:  1,
 				FirstName: body.FirstName,

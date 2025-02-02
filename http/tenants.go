@@ -66,7 +66,7 @@ func (t *TenantHandler) createTenant(w http.ResponseWriter, r *http.Request) *ap
 	res := TenantSignupResponse{
 		Message: "tenant registered successfully",
 		Tenant:  newTenant,
-		User:    MapToPublicUser(newUser),
+		Admin:   MapToPublicUser(newUser),
 	}
 	json.NewEncoder(w).Encode(res)
 	return nil
