@@ -12,7 +12,7 @@ func main() {
 	logger := slog.New(slog.NewTextHandler(os.Stdout, nil))
 	slog.SetDefault(logger)
 
-	dsn := "postgres://postgres:lealdade@localhost:5432/multenc"
+	dsn := "postgres://postgres:lealdade@localhost:5432/multency"
 	conn, err := postgres.Connect(dsn)
 	if err != nil {
 		logger.Error(err.Error())
