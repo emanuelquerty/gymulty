@@ -2,6 +2,7 @@ package http
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"net/http"
 	"net/http/httptest"
@@ -27,13 +28,13 @@ func TestCreateTenant(t *testing.T) {
 
 	t.Run("returns newly created tenant on success", func(t *testing.T) {
 		userStore := new(mock.UserStore)
-		userStore.CreateUserFn = func(tenantID int, data domain.User) (domain.User, error) {
+		userStore.CreateUserFn = func(ctx context.Context, tenantID int, data domain.User) (domain.User, error) {
 			data.ID = 1
 			return data, nil
 		}
 
 		tenantStore := new(mock.TenantStore)
-		tenantStore.CreateTenantFn = func(data domain.Tenant) (domain.Tenant, error) {
+		tenantStore.CreateTenantFn = func(ctx context.Context, data domain.Tenant) (domain.Tenant, error) {
 			data.ID = 1
 			return data, nil
 		}

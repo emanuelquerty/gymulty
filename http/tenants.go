@@ -26,7 +26,10 @@ func NewTenantHandler(tenantStore domain.TenantStore, userStore domain.UserStore
 }
 
 func (t *TenantHandler) registerRoutes(router *http.ServeMux) {
+	userHandler := NewUserHandler(t.userStore)
+
 	router.Handle("POST /api/tenants/signup", errorHandler(t.createTenant))
+	router.Handle("/api/tenants/{tenantID}/", userHandler)
 }
 
 func (t *TenantHandler) createTenant(w http.ResponseWriter, r *http.Request) *appError {
@@ -37,7 +40,7 @@ func (t *TenantHandler) createTenant(w http.ResponseWriter, r *http.Request) *ap
 		BusinessName: body.BusinessName,
 		Subdomain:    body.Subdomain,
 	}
-	newTenant, err := t.tenantStore.CreateTenant(tenant)
+	newTenant, err := t.tenantStore.CreateTenant(r.Context(), tenant)
 	if err != nil {
 		return &appError{Error: err, Message: "could not create tenant", Code: http.StatusBadRequest}
 	}
@@ -52,12 +55,12 @@ func (t *TenantHandler) createTenant(w http.ResponseWriter, r *http.Request) *ap
 	}
 	err = user.HashPassword()
 	if err != nil {
-		return &appError{Error: err, Message: "could not create user", Code: http.StatusInternalServerError}
+		return &appError{Error: err, Message: "could not create tenant", Code: http.StatusInternalServerError}
 	}
 
-	newUser, err := t.userStore.CreateUser(newTenant.ID, user)
+	newUser, err := t.userStore.CreateUser(r.Context(), newTenant.ID, user)
 	if err != nil {
-		return &appError{Error: err, Message: "could not create user", Code: http.StatusBadRequest}
+		return &appError{Error: err, Message: "could not create user for given tenant", Code: http.StatusBadRequest}
 	}
 
 	res := TenantSignupResponse{

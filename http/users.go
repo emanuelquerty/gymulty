@@ -24,18 +24,13 @@ func NewUserHandler(store domain.UserStore) *UserHandler {
 	return userHandler
 }
 
-func (u *UserHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	u.Handler = http.StripPrefix("/api", u.Handler)
-	u.Handler.ServeHTTP(w, r)
-}
-
 func (u *UserHandler) registerRoutes(router *http.ServeMux) {
-	router.Handle("GET /tenants/{tenantID}/users/{userID}", errorHandler(u.getUserByID))
-	router.Handle("POST /tenants/{tenantID}/users", errorHandler(u.createUser))
+	router.Handle("GET /api/tenants/{tenantID}/users/{userID}", errorHandler(u.getUserByID))
+	router.Handle("POST /api/tenants/{tenantID}/users", errorHandler(u.createUser))
 
-	router.Handle("PUT /tenants/{tenantID}/users/{userID}", errorHandler(u.updateUser))
-	router.Handle("DELETE /tenants/{tenantID}/users/{userID}", errorHandler(u.deleteUserByID))
-	router.Handle("GET /tenants/{tenantID}/users", errorHandler(u.getAllUsers))
+	router.Handle("PUT /api/tenants/{tenantID}/users/{userID}", errorHandler(u.updateUser))
+	router.Handle("DELETE /api/tenants/{tenantID}/users/{userID}", errorHandler(u.deleteUserByID))
+	router.Handle("GET /api/tenants/{tenantID}/users", errorHandler(u.getAllUsers))
 }
 
 func (u *UserHandler) getUserByID(w http.ResponseWriter, r *http.Request) *appError {
@@ -52,7 +47,7 @@ func (u *UserHandler) getUserByID(w http.ResponseWriter, r *http.Request) *appEr
 		return &appError{Error: err, Message: "malformed url: invalid tenant id", Code: http.StatusBadRequest}
 	}
 
-	user, err := u.store.GetUserByID(tenantID, userID)
+	user, err := u.store.GetUserByID(r.Context(), tenantID, userID)
 	if err != nil {
 		return &appError{Error: err, Message: "user was not found", Code: http.StatusNotFound}
 	}
@@ -76,7 +71,7 @@ func (u *UserHandler) createUser(w http.ResponseWriter, r *http.Request) *appErr
 		return &appError{Error: err, Message: "could not create user", Code: 500}
 	}
 
-	newUser, err := u.store.CreateUser(tenantID, user)
+	newUser, err := u.store.CreateUser(r.Context(), tenantID, user)
 	if err != nil {
 		return &appError{Error: err, Message: "could not create user", Code: 500}
 	}
@@ -107,7 +102,7 @@ func (u *UserHandler) updateUser(w http.ResponseWriter, r *http.Request) *appErr
 	var update domain.UserUpdate
 	json.NewDecoder(r.Body).Decode(&update)
 
-	updatedUser, err := u.store.UpdateUser(tenantID, userID, update)
+	updatedUser, err := u.store.UpdateUser(r.Context(), tenantID, userID, update)
 	if err != nil {
 		return &appError{Error: err, Message: "could not update user", Code: http.StatusNotFound}
 	}
@@ -129,7 +124,7 @@ func (u *UserHandler) deleteUserByID(w http.ResponseWriter, r *http.Request) *ap
 		return &appError{Error: err, Message: "malformed url: invalid tenant id", Code: http.StatusBadRequest}
 	}
 
-	err = u.store.DeleteUserByID(tenantID, userID)
+	err = u.store.DeleteUserByID(r.Context(), tenantID, userID)
 	if err != nil {
 		return &appError{Error: err, Message: "could not delete user", Code: http.StatusNotFound}
 	}
@@ -145,7 +140,7 @@ func (u *UserHandler) getAllUsers(w http.ResponseWriter, r *http.Request) *appEr
 		return &appError{Error: err, Message: "malformed url: invalid tenant id", Code: http.StatusBadRequest}
 	}
 
-	users, err := u.store.GetAllUsers(tenantID)
+	users, err := u.store.GetAllUsers(r.Context(), tenantID)
 	if err != nil {
 		return &appError{Error: err, Message: "could not retrieve users", Code: http.StatusNotFound}
 	}
@@ -170,5 +165,7 @@ func MapToPublicUser(user domain.User) domain.PublicUser {
 		FirstName: user.FirstName,
 		LastName:  user.LastName,
 		Role:      user.Role,
+		CreatedAt: user.CreatedAt,
+		UpdatedAt: user.UpdatedAt,
 	}
 }

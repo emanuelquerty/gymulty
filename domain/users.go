@@ -1,6 +1,7 @@
 package domain
 
 import (
+	"context"
 	"time"
 
 	"golang.org/x/crypto/bcrypt"
@@ -49,9 +50,9 @@ type UserUpdate struct {
 }
 
 type UserStore interface {
-	GetUserByID(tenantID int, userID int) (User, error)
-	CreateUser(tenantID int, user User) (User, error)
-	UpdateUser(tenantID int, userID int, updates UserUpdate) (User, error)
-	DeleteUserByID(tenantID int, userID int) error
-	GetAllUsers(tenantID int) ([]User, error)
+	CreateUser(ctx context.Context, tenantID int, user User) (User, error)
+	GetUserByID(ctx context.Context, tenantID int, userID int) (User, error)
+	UpdateUser(ctx context.Context, tenantID int, userID int, updates UserUpdate) (User, error)
+	DeleteUserByID(ctx context.Context, tenantID int, userID int) error
+	GetAllUsers(ctx context.Context, tenantID int) ([]User, error)
 }

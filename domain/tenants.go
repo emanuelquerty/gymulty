@@ -1,11 +1,15 @@
 package domain
 
-import "time"
+import (
+	"context"
+	"time"
+)
 
 type Tenant struct {
 	ID           int
 	BusinessName string
 	Subdomain    string
+	Status       string
 	CreatedAt    time.Time
 	UpdatedAt    time.Time
 }
@@ -20,5 +24,5 @@ type TenantBody struct {
 }
 
 type TenantStore interface {
-	CreateTenant(data Tenant) (Tenant, error)
+	CreateTenant(ctx context.Context, data Tenant) (Tenant, error)
 }

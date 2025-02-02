@@ -2,6 +2,7 @@ package http
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"errors"
 	"net/http"
@@ -24,7 +25,7 @@ func TestGetUser(t *testing.T) {
 
 	t.Run("returns 200 status code for existing user id ", func(t *testing.T) {
 		userStore := new(mock.UserStore)
-		userStore.GetUserByIDFn = func(tenantID int, userID int) (domain.User, error) {
+		userStore.GetUserByIDFn = func(ctx context.Context, tenantID int, userID int) (domain.User, error) {
 			return user, nil
 		}
 		req := httptest.NewRequest("GET", "/api/tenants/1/users/1", nil)
@@ -36,7 +37,7 @@ func TestGetUser(t *testing.T) {
 
 	t.Run("returns user with id 7", func(t *testing.T) {
 		userStore := new(mock.UserStore)
-		userStore.GetUserByIDFn = func(tenantID int, userID int) (domain.User, error) {
+		userStore.GetUserByIDFn = func(ctx context.Context, tenantID int, userID int) (domain.User, error) {
 			found := user
 			found.ID = 7
 			return found, nil
@@ -65,7 +66,7 @@ func TestGetUser(t *testing.T) {
 			Role:      "trainer",
 		}
 		userStore := new(mock.UserStore)
-		userStore.GetUserByIDFn = func(tenantID int, userID int) (domain.User, error) {
+		userStore.GetUserByIDFn = func(ctx context.Context, tenantID int, userID int) (domain.User, error) {
 			return user, nil
 		}
 		req := httptest.NewRequest("GET", "/api/tenants/1/users/2", nil)
@@ -86,7 +87,7 @@ func TestGetUser(t *testing.T) {
 
 	t.Run("returns 404 status code for non-existing user id", func(t *testing.T) {
 		userStore := new(mock.UserStore)
-		userStore.GetUserByIDFn = func(tenantID int, userID int) (domain.User, error) {
+		userStore.GetUserByIDFn = func(ctx context.Context, tenantID int, userID int) (domain.User, error) {
 			return domain.User{}, errors.New("not found")
 		}
 
@@ -99,7 +100,7 @@ func TestGetUser(t *testing.T) {
 
 	t.Run("returns 400 status code for invalid user id", func(t *testing.T) {
 		userStore := new(mock.UserStore)
-		userStore.GetUserByIDFn = func(tenantID int, userID int) (domain.User, error) {
+		userStore.GetUserByIDFn = func(ctx context.Context, tenantID int, userID int) (domain.User, error) {
 			return domain.User{}, nil
 		}
 
@@ -124,7 +125,7 @@ func TestCreateUser(t *testing.T) {
 
 	t.Run("returns 201 status code", func(t *testing.T) {
 		userStore := new(mock.UserStore)
-		userStore.CreateUserFn = func(tenantID int, user domain.User) (domain.User, error) {
+		userStore.CreateUserFn = func(ctx context.Context, tenantID int, user domain.User) (domain.User, error) {
 			return domain.User{}, nil
 		}
 		body, _ := json.Marshal(user)
@@ -139,7 +140,7 @@ func TestCreateUser(t *testing.T) {
 
 	t.Run("returns newly created user", func(t *testing.T) {
 		userStore := new(mock.UserStore)
-		userStore.CreateUserFn = func(tenantID int, user domain.User) (domain.User, error) {
+		userStore.CreateUserFn = func(ctx context.Context, tenantID int, user domain.User) (domain.User, error) {
 			return user, nil
 		}
 
@@ -158,7 +159,7 @@ func TestCreateUser(t *testing.T) {
 
 	t.Run("returns location header with full resource uri", func(t *testing.T) {
 		userStore := new(mock.UserStore)
-		userStore.CreateUserFn = func(tenantID int, user domain.User) (domain.User, error) {
+		userStore.CreateUserFn = func(ctx context.Context, tenantID int, user domain.User) (domain.User, error) {
 			return user, nil
 		}
 
@@ -169,7 +170,7 @@ func TestCreateUser(t *testing.T) {
 		res := newUserRequest(userStore, req)
 
 		got := res.Header().Get("Location")
-		want := "://example.com/tenants/1/users/1" // newly created resource always has mocked ID = 1
+		want := "://example.com/api/tenants/1/users/1" // newly created resource always has mocked ID = 1
 		assert.Equal(t, want, got, "urls should be equal")
 	})
 }
@@ -193,7 +194,7 @@ func TestUpdateUser(t *testing.T) {
 			Role:  &newRole,
 		}
 		userStore := new(mock.UserStore)
-		userStore.UpdateUserFn = func(tenantID int, userID int, update domain.UserUpdate) (domain.User, error) {
+		userStore.UpdateUserFn = func(ctx context.Context, tenantID int, userID int, update domain.UserUpdate) (domain.User, error) {
 			updatedUser := user
 			updatedUser.Email = *update.Email
 			updatedUser.Role = *update.Role
@@ -215,7 +216,7 @@ func TestUpdateUser(t *testing.T) {
 
 	t.Run("returns 400 status code for invalid id", func(t *testing.T) {
 		userStore := new(mock.UserStore)
-		userStore.UpdateUserFn = func(tenantID int, userID int, update domain.UserUpdate) (domain.User, error) {
+		userStore.UpdateUserFn = func(ctx context.Context, tenantID int, userID int, update domain.UserUpdate) (domain.User, error) {
 			return domain.User{}, nil
 		}
 		req := httptest.NewRequest("PUT", "/api/tenants/1/users/notValidID8", nil)
@@ -228,7 +229,7 @@ func TestUpdateUser(t *testing.T) {
 
 	t.Run("returns 404 status code for non-existing user id", func(t *testing.T) {
 		userStore := new(mock.UserStore)
-		userStore.UpdateUserFn = func(tenantID int, userID int, update domain.UserUpdate) (domain.User, error) {
+		userStore.UpdateUserFn = func(ctx context.Context, tenantID int, userID int, update domain.UserUpdate) (domain.User, error) {
 			return domain.User{}, errors.New("not found")
 		}
 		req := httptest.NewRequest("PUT", "/api/tenants/1/users/27", nil)
@@ -245,7 +246,7 @@ func TestDelete(t *testing.T) {
 	t.Run("returns 204 on success", func(t *testing.T) {
 		req := httptest.NewRequest("DELETE", "/api/tenants/1/users/2", nil)
 		userstore := new(mock.UserStore)
-		userstore.DeleteByIDFn = func(tenantID int, userID int) error {
+		userstore.DeleteByIDFn = func(ctx context.Context, tenantID int, userID int) error {
 			return nil
 		}
 
@@ -258,7 +259,7 @@ func TestDelete(t *testing.T) {
 	t.Run("returns 404 for non-existing id", func(t *testing.T) {
 		req := httptest.NewRequest("DELETE", "/api/tenants/1/users/5", nil)
 		userstore := new(mock.UserStore)
-		userstore.DeleteByIDFn = func(tenantID int, userID int) error {
+		userstore.DeleteByIDFn = func(ctx context.Context, tenantID int, userID int) error {
 			return errors.New("not found")
 		}
 
@@ -270,7 +271,7 @@ func TestDelete(t *testing.T) {
 
 	t.Run("returns 400 status code for invalid id", func(t *testing.T) {
 		userStore := new(mock.UserStore)
-		userStore.DeleteByIDFn = func(tenantID int, userID int) error {
+		userStore.DeleteByIDFn = func(ctx context.Context, tenantID int, userID int) error {
 			return nil // this func is never called for this test, so return val here is irrelevant
 		}
 		req := httptest.NewRequest("DELETE", "/api/tenants/1/users/InvalidID", nil)
@@ -296,7 +297,7 @@ func TestGetAllUsers(t *testing.T) {
 
 	t.Run("returns all users on success given tenantID", func(t *testing.T) {
 		userStore := new(mock.UserStore)
-		userStore.GetAllUsersFn = func(tenantID int) ([]domain.User, error) {
+		userStore.GetAllUsersFn = func(ctx context.Context, tenantID int) ([]domain.User, error) {
 			return users, nil
 		}
 

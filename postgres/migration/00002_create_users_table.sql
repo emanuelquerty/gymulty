@@ -6,10 +6,10 @@ CREATE TABLE users (
     first_name TEXT,
     last_name TEXT,
     email VARCHAR (255) UNIQUE NOT NULL,
-    password_hash VARCHAR (255) NOT NULL,
-    role VARCHAR (50) NOT NULL,
-    created_at TIMESTAMP DEFAULT NOW(),
-    updated_at TIMESTAMP DEFAULT NOW()
+    password TEXT NOT NULL,
+    role VARCHAR (50) CHECK (role IN ('admin', 'trainer', 'member')),
+    created_at TIMESTAMPTZ DEFAULT NOW(),
+    updated_at TIMESTAMPTZ DEFAULT NOW()
 );
 -- +goose StatementEnd
 
