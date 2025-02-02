@@ -42,12 +42,12 @@ func (u *UserHandler) getUserByID(w http.ResponseWriter, r *http.Request) *appEr
 
 	userID, err := strconv.Atoi(uID)
 	if err != nil {
-		return &appError{Error: err, Message: "malformed url: invalid user id", Code: 400, Logger: u.logger}
+		return &appError{Error: err, Message: "invalid user id", Code: 400, Logger: u.logger}
 	}
 
 	tenantID, err := strconv.Atoi(tID)
 	if err != nil {
-		return &appError{Error: err, Message: "malformed url: invalid tenant id", Code: 400, Logger: u.logger}
+		return &appError{Error: err, Message: "invalid tenant id", Code: 400, Logger: u.logger}
 	}
 
 	user, err := u.store.GetUserByID(r.Context(), tenantID, userID)
@@ -63,7 +63,7 @@ func (u *UserHandler) createUser(w http.ResponseWriter, r *http.Request) *appErr
 	tID := r.PathValue("tenantID")
 	tenantID, err := strconv.Atoi(tID)
 	if err != nil {
-		return &appError{Error: err, Message: "malformed url: invalid tenant id", Code: 400, Logger: u.logger}
+		return &appError{Error: err, Message: "invalid tenant id", Code: 400, Logger: u.logger}
 	}
 
 	var user domain.User
@@ -94,12 +94,12 @@ func (u *UserHandler) updateUser(w http.ResponseWriter, r *http.Request) *appErr
 
 	userID, err := strconv.Atoi(uID)
 	if err != nil {
-		return &appError{Error: err, Message: "malformed url: invalid user id", Code: 400, Logger: u.logger}
+		return &appError{Error: err, Message: "invalid user id", Code: 400, Logger: u.logger}
 	}
 
 	tenantID, err := strconv.Atoi(tID)
 	if err != nil {
-		return &appError{Error: err, Message: "malformed url: invalid tenant id", Code: 400, Logger: u.logger}
+		return &appError{Error: err, Message: "invalid tenant id", Code: 400, Logger: u.logger}
 	}
 
 	var update domain.UserUpdate
@@ -119,12 +119,12 @@ func (u *UserHandler) deleteUserByID(w http.ResponseWriter, r *http.Request) *ap
 
 	userID, err := strconv.Atoi(uID)
 	if err != nil {
-		return &appError{Error: err, Message: "malformed url: invalid user id", Code: 400, Logger: u.logger}
+		return &appError{Error: err, Message: "invalid user id", Code: 400, Logger: u.logger}
 	}
 
 	tenantID, err := strconv.Atoi(tID)
 	if err != nil {
-		return &appError{Error: err, Message: "malformed url: invalid tenant id", Code: 400, Logger: u.logger}
+		return &appError{Error: err, Message: "invalid tenant id", Code: 400, Logger: u.logger}
 	}
 
 	err = u.store.DeleteUserByID(r.Context(), tenantID, userID)
@@ -140,7 +140,7 @@ func (u *UserHandler) getAllUsers(w http.ResponseWriter, r *http.Request) *appEr
 
 	tenantID, err := strconv.Atoi(tID)
 	if err != nil {
-		return &appError{Error: err, Message: "malformed url: invalid tenant id", Code: 400, Logger: u.logger}
+		return &appError{Error: err, Message: "invalid tenant id", Code: 400, Logger: u.logger}
 	}
 
 	users, err := u.store.GetAllUsers(r.Context(), tenantID)
