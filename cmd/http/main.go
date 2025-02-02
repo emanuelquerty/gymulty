@@ -19,8 +19,7 @@ func main() {
 	logger := slog.New(slog.NewTextHandler(os.Stdout, nil))
 
 	server := http.NewServer(conn, logger)
-	err = server.ListenAndServe("8080")
-	if err != nil {
+	if err = server.ListenAndServe("8080"); err != nil {
 		log.Fatal(err)
 	}
 }
