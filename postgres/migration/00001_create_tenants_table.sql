@@ -4,7 +4,7 @@ CREATE TABLE tenants (
     id SERIAL PRIMARY KEY,
     business_name VARCHAR (255) UNIQUE NOT NULL,
     subdomain VARCHAR (255) UNIQUE NOT NULL,
-    status VARCHAR (50) DEFAULT 'active',
+    status VARCHAR (50) CHECK(status IN ('active', 'inactive')) DEFAULT 'active',
     created_at TIMESTAMPTZ DEFAULT NOW(),
     updated_at TIMESTAMPTZ DEFAULT NOW()
 );
