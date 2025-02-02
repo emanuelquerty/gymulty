@@ -1,7 +1,6 @@
 package http
 
 import (
-	"fmt"
 	"log/slog"
 	"net/http"
 
@@ -42,7 +41,6 @@ func (s *Server) ListenAndServe(port string) error {
 		Addr:    ":" + port,
 		Handler: s.router,
 	}
-
-	fmt.Println("Server listening on port", port)
+	s.logger.Info("server is running", slog.String("port", port))
 	return server.ListenAndServe()
 }
