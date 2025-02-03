@@ -55,7 +55,14 @@ func (u *UserHandler) getUserByID(w http.ResponseWriter, r *http.Request) *appEr
 		return &appError{Error: err, Message: "user was not found", Code: 404, Logger: u.logger}
 	}
 
-	json.NewEncoder(w).Encode(user)
+	res := Response[domain.PublicUser]{
+		Success: true,
+		Count:   1,
+		Type:    "users",
+		Data:    MapToPublicUser(user),
+	}
+
+	json.NewEncoder(w).Encode(res)
 	return nil
 }
 
@@ -79,12 +86,17 @@ func (u *UserHandler) createUser(w http.ResponseWriter, r *http.Request) *appErr
 		return &appError{Error: err, Message: "could not create user", Code: 500, Logger: u.logger}
 	}
 
-	publicUser := MapToPublicUser(newUser)
-	resourceURI := fmt.Sprintf("%s://%s%s/%d", r.URL.Scheme, r.Host, r.URL.String(), publicUser.ID)
+	res := Response[domain.PublicUser]{
+		Success: true,
+		Count:   1,
+		Type:    "users",
+		Data:    MapToPublicUser(newUser),
+	}
+	resourceURI := fmt.Sprintf("%s://%s%s/%d", r.URL.Scheme, r.Host, r.URL.String(), newUser.ID)
 
 	w.Header().Set("Location", resourceURI)
 	w.WriteHeader(201)
-	json.NewEncoder(w).Encode(publicUser)
+	json.NewEncoder(w).Encode(res)
 	return nil
 }
 
@@ -105,11 +117,18 @@ func (u *UserHandler) updateUser(w http.ResponseWriter, r *http.Request) *appErr
 	var update domain.UserUpdate
 	json.NewDecoder(r.Body).Decode(&update)
 
-	updatedUser, err := u.store.UpdateUser(r.Context(), tenantID, userID, update)
+	user, err := u.store.UpdateUser(r.Context(), tenantID, userID, update)
 	if err != nil {
 		return &appError{Error: err, Message: "could not update user", Code: 404, Logger: u.logger}
 	}
-	json.NewEncoder(w).Encode(updatedUser)
+
+	res := Response[domain.PublicUser]{
+		Success: true,
+		Count:   1,
+		Type:    "users",
+		Data:    MapToPublicUser(user),
+	}
+	json.NewEncoder(w).Encode(res)
 	return nil
 }
 
@@ -149,12 +168,11 @@ func (u *UserHandler) getAllUsers(w http.ResponseWriter, r *http.Request) *appEr
 	}
 
 	userCount := len(users)
-	res := struct {
-		Message string
-		Users   []domain.User
-	}{
-		Message: fmt.Sprintf("found %d users", userCount),
-		Users:   users,
+	res := Response[[]domain.PublicUser]{
+		Success: true,
+		Count:   userCount,
+		Type:    "users",
+		Data:    MapToPublicUsers(users),
 	}
 
 	json.NewEncoder(w).Encode(res)
@@ -171,4 +189,13 @@ func MapToPublicUser(user domain.User) domain.PublicUser {
 		CreatedAt: user.CreatedAt,
 		UpdatedAt: user.UpdatedAt,
 	}
+}
+
+func MapToPublicUsers(users []domain.User) []domain.PublicUser {
+	var publicUsers []domain.PublicUser
+	for _, val := range users {
+		curr := MapToPublicUser(val)
+		publicUsers = append(publicUsers, curr)
+	}
+	return publicUsers
 }

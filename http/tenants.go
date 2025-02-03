@@ -48,7 +48,7 @@ func (t *TenantHandler) createTenant(w http.ResponseWriter, r *http.Request) *ap
 		return &appError{Error: err, Message: "could not create tenant", Code: 400, Logger: t.logger}
 	}
 
-	user := domain.User{
+	userBody := domain.User{
 		TenantID:  newTenant.ID,
 		FirstName: body.FirstName,
 		LastName:  body.LastName,
@@ -56,12 +56,12 @@ func (t *TenantHandler) createTenant(w http.ResponseWriter, r *http.Request) *ap
 		Password:  body.Password,
 		Role:      "admin",
 	}
-	err = user.HashPassword()
+	err = userBody.HashPassword()
 	if err != nil {
 		return &appError{Error: err, Message: "could not create tenant", Code: 500, Logger: t.logger}
 	}
 
-	newUser, err := t.userStore.CreateUser(r.Context(), newTenant.ID, user)
+	newUser, err := t.userStore.CreateUser(r.Context(), newTenant.ID, userBody)
 	if err != nil {
 		return &appError{Error: err, Message: "could not create user for given tenant", Code: 400, Logger: t.logger}
 	}

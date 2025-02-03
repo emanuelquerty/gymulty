@@ -46,15 +46,20 @@ func TestGetUser(t *testing.T) {
 		req := httptest.NewRequest("GET", "/api/tenants/1/users/7", nil)
 		res := newUserRequest(userStore, req)
 
-		var got domain.PublicUser
+		var got Response[domain.PublicUser]
 		json.NewDecoder(res.Body).Decode(&got)
 
-		want := domain.PublicUser{
-			ID:        7,
-			TenantID:  1,
-			FirstName: "Peter",
-			LastName:  "Petrelli",
-			Role:      "admin",
+		want := Response[domain.PublicUser]{
+			Success: true,
+			Count:   1,
+			Type:    "users",
+			Data: domain.PublicUser{
+				ID:        7,
+				TenantID:  1,
+				FirstName: "Peter",
+				LastName:  "Petrelli",
+				Role:      "admin",
+			},
 		}
 		assert.Equal(t, want, got, "users should be equal")
 	})
@@ -73,15 +78,20 @@ func TestGetUser(t *testing.T) {
 		req := httptest.NewRequest("GET", "/api/tenants/1/users/2", nil)
 		res := newUserRequest(userStore, req)
 
-		var got domain.PublicUser
+		var got Response[domain.PublicUser]
 		json.NewDecoder(res.Body).Decode(&got)
 
-		want := domain.PublicUser{
-			ID:        2,
-			TenantID:  1,
-			FirstName: "Bruce",
-			LastName:  "Banner",
-			Role:      "trainer",
+		want := Response[domain.PublicUser]{
+			Success: true,
+			Count:   1,
+			Type:    "users",
+			Data: domain.PublicUser{
+				ID:        2,
+				TenantID:  1,
+				FirstName: "Bruce",
+				LastName:  "Banner",
+				Role:      "trainer",
+			},
 		}
 		assert.Equal(t, want, got, "users should be equal")
 	})
@@ -151,10 +161,23 @@ func TestCreateUser(t *testing.T) {
 		req := httptest.NewRequest(http.MethodPost, "/api/tenants/1/users", bodyBuff)
 		res := newUserRequest(userStore, req)
 
-		var got domain.PublicUser
+		var got Response[domain.PublicUser]
 		json.NewDecoder(res.Body).Decode(&got)
 
-		want := MapToPublicUser(user)
+		want := Response[domain.PublicUser]{
+			Success: true,
+			Count:   1,
+			Type:    "users",
+			Data: domain.PublicUser{
+				ID:        user.ID,
+				TenantID:  user.TenantID,
+				FirstName: user.FirstName,
+				LastName:  user.LastName,
+				Role:      user.Role,
+				CreatedAt: user.CreatedAt,
+				UpdatedAt: user.UpdatedAt,
+			},
+		}
 		assert.Equal(t, want, got, "users should be equal")
 	})
 
@@ -188,29 +211,41 @@ func TestUpdateUser(t *testing.T) {
 	}
 
 	t.Run("returns newly updated user", func(t *testing.T) {
-		newEmail := "Johnnypresley@email.com"
+		newFirstName := "Johnnyyyyyyy"
 		newRole := "coach"
 		update := domain.UserUpdate{
-			Email: &newEmail,
-			Role:  &newRole,
+			Firstname: &newFirstName,
+			Role:      &newRole,
 		}
 		userStore := new(mock.UserStore)
 		userStore.UpdateUserFn = func(ctx context.Context, tenantID int, userID int, update domain.UserUpdate) (domain.User, error) {
 			updatedUser := user
-			updatedUser.Email = *update.Email
+			updatedUser.FirstName = *update.Firstname
 			updatedUser.Role = *update.Role
 			return updatedUser, nil
 		}
-		want := user
-		want.Email = *update.Email
-		want.Role = *update.Role
+
+		want := Response[domain.PublicUser]{
+			Success: true,
+			Count:   1,
+			Type:    "users",
+			Data: domain.PublicUser{
+				ID:        user.ID,
+				TenantID:  user.TenantID,
+				FirstName: *update.Firstname,
+				LastName:  user.LastName,
+				Role:      *update.Role,
+				CreatedAt: user.CreatedAt,
+				UpdatedAt: user.UpdatedAt,
+			},
+		}
 
 		body, _ := json.Marshal(update)
 		bodyBuff := bytes.NewBuffer(body)
 		req := httptest.NewRequest(http.MethodPut, "/api/tenants/1/users/3", bodyBuff)
 		res := newUserRequest(userStore, req)
 
-		var got domain.User
+		var got Response[domain.PublicUser]
 		json.NewDecoder(res.Body).Decode(&got)
 		assert.Equal(t, want, got, "they should be equal")
 	})
@@ -305,17 +340,14 @@ func TestGetAllUsers(t *testing.T) {
 		req := httptest.NewRequest("GET", "/api/tenants/1/users", nil)
 		res := newUserRequest(userStore, req)
 
-		type response struct {
-			Message string
-			Users   []domain.User
-		}
-
-		var got response
+		var got Response[[]domain.PublicUser]
 		json.NewDecoder(res.Body).Decode(&got)
 
-		want := response{
-			Message: "found 1 users",
-			Users:   users,
+		want := Response[[]domain.PublicUser]{
+			Success: true,
+			Count:   1,
+			Type:    "users",
+			Data:    MapToPublicUsers(users),
 		}
 
 		assert.Equal(t, want, got, "responses should match")
