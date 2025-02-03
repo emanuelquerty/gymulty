@@ -43,23 +43,28 @@ func TestCreateTenant(t *testing.T) {
 		req := httptest.NewRequest("POST", "/api/tenants/signup", buf)
 		res := newTenantRequest(tenantStore, userStore, req)
 
-		want := TenantSignupResponse{
-			Message: "tenant registered successfully",
-			Tenant: domain.Tenant{
-				ID:           1,
-				BusinessName: body.BusinessName,
-				Subdomain:    body.Subdomain,
-			},
-			Admin: domain.PublicUser{
-				ID:        1,
-				TenantID:  1,
-				FirstName: body.FirstName,
-				LastName:  body.LastName,
-				Role:      "admin",
+		want := Response[TenantSignupResponse]{
+			Success: true,
+			Count:   1,
+			Type:    "tenants",
+			Data: TenantSignupResponse{
+				Message: "tenant registered successfully",
+				Tenant: domain.Tenant{
+					ID:           1,
+					BusinessName: body.BusinessName,
+					Subdomain:    body.Subdomain,
+				},
+				Admin: domain.PublicUser{
+					ID:        1,
+					TenantID:  1,
+					FirstName: body.FirstName,
+					LastName:  body.LastName,
+					Role:      "admin",
+				},
 			},
 		}
 
-		var got TenantSignupResponse
+		var got Response[TenantSignupResponse]
 		json.NewDecoder(res.Body).Decode(&got)
 		assert.Equal(t, want, got, "tenants should match")
 	})
