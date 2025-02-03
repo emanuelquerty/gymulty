@@ -9,8 +9,8 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"github.com/emanuelquerty/multency/domain"
-	"github.com/emanuelquerty/multency/mock"
+	"github.com/emanuelquerty/gymulty/domain"
+	"github.com/emanuelquerty/gymulty/mock"
 	"github.com/stretchr/testify/assert"
 )
 

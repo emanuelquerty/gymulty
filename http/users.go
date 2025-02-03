@@ -7,7 +7,7 @@ import (
 	"net/http"
 	"strconv"
 
-	"github.com/emanuelquerty/multency/domain"
+	"github.com/emanuelquerty/gymulty/domain"
 )
 
 type UserHandler struct {

@@ -1,6 +1,6 @@
 package http
 
-import "github.com/emanuelquerty/multency/domain"
+import "github.com/emanuelquerty/gymulty/domain"
 
 type Response[T any] struct {
 	Success bool   `json:"success,omitempty"  bson:"success"`

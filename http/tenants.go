@@ -5,7 +5,7 @@ import (
 	"log/slog"
 	"net/http"
 
-	"github.com/emanuelquerty/multency/domain"
+	"github.com/emanuelquerty/gymulty/domain"
 )
 
 type TenantHandler struct {

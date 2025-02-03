@@ -4,7 +4,7 @@ import (
 	"log/slog"
 	"net/http"
 
-	"github.com/emanuelquerty/multency/postgres"
+	"github.com/emanuelquerty/gymulty/postgres"
 	"github.com/jackc/pgx/v5"
 )
 

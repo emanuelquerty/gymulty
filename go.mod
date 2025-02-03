@@ -1,4 +1,4 @@
-module github.com/emanuelquerty/multency
+module github.com/emanuelquerty/gymulty
 
 go 1.22.2
 

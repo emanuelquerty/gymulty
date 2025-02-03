@@ -3,7 +3,7 @@ package mock
 import (
 	"context"
 
-	"github.com/emanuelquerty/multency/domain"
+	"github.com/emanuelquerty/gymulty/domain"
 )
 
 var _ domain.UserStore = (*UserStore)(nil)

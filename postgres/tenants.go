@@ -3,7 +3,7 @@ package postgres
 import (
 	"context"
 
-	"github.com/emanuelquerty/multency/domain"
+	"github.com/emanuelquerty/gymulty/domain"
 	"github.com/jackc/pgx/v5"
 )
 
