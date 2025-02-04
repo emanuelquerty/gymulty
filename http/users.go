@@ -65,6 +65,7 @@ func (u *UserHandler) getUserByID(w http.ResponseWriter, r *http.Request) *appEr
 		Data:    MapToPublicUser(user),
 	}
 
+	w.WriteHeader(http.StatusOK)
 	json.NewEncoder(w).Encode(res)
 	return nil
 }
@@ -102,7 +103,7 @@ func (u *UserHandler) createUser(w http.ResponseWriter, r *http.Request) *appErr
 	resourceURI := fmt.Sprintf("%s://%s%s/%d", r.URL.Scheme, r.Host, r.URL.String(), newUser.ID)
 
 	w.Header().Set("Location", resourceURI)
-	w.WriteHeader(201)
+	w.WriteHeader(http.StatusCreated)
 	json.NewEncoder(w).Encode(res)
 	return nil
 }
@@ -136,6 +137,7 @@ func (u *UserHandler) updateUser(w http.ResponseWriter, r *http.Request) *appErr
 		Type:    "users",
 		Data:    MapToPublicUser(user),
 	}
+	w.WriteHeader(http.StatusOK)
 	json.NewEncoder(w).Encode(res)
 	return nil
 }
@@ -159,13 +161,13 @@ func (u *UserHandler) deleteUserByID(w http.ResponseWriter, r *http.Request) *ap
 		}
 		return e.withContext(err, "An internal server error ocurred. Please try again later", ErrInternal)
 	}
-	w.WriteHeader(http.StatusNoContent)
 	res := Response[domain.PublicUser]{
 		Success: true,
 		Count:   1,
 		Type:    "users",
 		Data:    domain.PublicUser{},
 	}
+	w.WriteHeader(http.StatusNoContent)
 	json.NewEncoder(w).Encode(res)
 	return nil
 }
@@ -193,6 +195,7 @@ func (u *UserHandler) getAllUsers(w http.ResponseWriter, r *http.Request) *appEr
 		Data:    MapToPublicUsers(users),
 	}
 
+	w.WriteHeader(http.StatusOK)
 	json.NewEncoder(w).Encode(res)
 	return nil
 }
