@@ -236,9 +236,9 @@ func TestUpdateUser(t *testing.T) {
 			Data: domain.PublicUser{
 				ID:        user.ID,
 				TenantID:  user.TenantID,
-				FirstName: *update.FirstName,
+				FirstName: *update.FirstName, // updated field
 				LastName:  user.LastName,
-				Role:      *update.Role,
+				Role:      *update.Role, // updated field
 				CreatedAt: user.CreatedAt,
 				UpdatedAt: user.UpdatedAt,
 			},
