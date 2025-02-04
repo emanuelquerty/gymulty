@@ -3,8 +3,8 @@ package http
 import (
 	"bytes"
 	"context"
+	"database/sql"
 	"encoding/json"
-	"errors"
 	"log/slog"
 	"net/http"
 	"net/http/httptest"
@@ -99,7 +99,7 @@ func TestGetUser(t *testing.T) {
 	t.Run("returns 404 status code for non-existing user id", func(t *testing.T) {
 		userStore := new(mock.UserStore)
 		userStore.GetUserByIDFn = func(ctx context.Context, tenantID int, userID int) (domain.User, error) {
-			return domain.User{}, errors.New("not found")
+			return domain.User{}, sql.ErrNoRows
 		}
 
 		req := httptest.NewRequest("GET", "/api/tenants/1/users/3", nil)
@@ -214,13 +214,13 @@ func TestUpdateUser(t *testing.T) {
 		newFirstName := "Johnnyyyyyyy"
 		newRole := "coach"
 		update := domain.UserUpdate{
-			Firstname: &newFirstName,
+			FirstName: &newFirstName,
 			Role:      &newRole,
 		}
 		userStore := new(mock.UserStore)
 		userStore.UpdateUserFn = func(ctx context.Context, tenantID int, userID int, update domain.UserUpdate) (domain.User, error) {
 			updatedUser := user
-			updatedUser.FirstName = *update.Firstname
+			updatedUser.FirstName = *update.FirstName
 			updatedUser.Role = *update.Role
 			return updatedUser, nil
 		}
@@ -232,7 +232,7 @@ func TestUpdateUser(t *testing.T) {
 			Data: domain.PublicUser{
 				ID:        user.ID,
 				TenantID:  user.TenantID,
-				FirstName: *update.Firstname,
+				FirstName: *update.FirstName,
 				LastName:  user.LastName,
 				Role:      *update.Role,
 				CreatedAt: user.CreatedAt,
@@ -266,7 +266,7 @@ func TestUpdateUser(t *testing.T) {
 	t.Run("returns 404 status code for non-existing user id", func(t *testing.T) {
 		userStore := new(mock.UserStore)
 		userStore.UpdateUserFn = func(ctx context.Context, tenantID int, userID int, update domain.UserUpdate) (domain.User, error) {
-			return domain.User{}, errors.New("not found")
+			return domain.User{}, sql.ErrNoRows
 		}
 		req := httptest.NewRequest("PUT", "/api/tenants/1/users/27", nil)
 		res := newUserRequest(userStore, req)
@@ -296,7 +296,7 @@ func TestDelete(t *testing.T) {
 		req := httptest.NewRequest("DELETE", "/api/tenants/1/users/5", nil)
 		userstore := new(mock.UserStore)
 		userstore.DeleteByIDFn = func(ctx context.Context, tenantID int, userID int) error {
-			return errors.New("not found")
+			return sql.ErrNoRows
 		}
 
 		res := newUserRequest(userstore, req)

@@ -6,17 +6,18 @@ import (
 
 	"github.com/emanuelquerty/gymulty/domain"
 	"github.com/jackc/pgx/v5"
+	"github.com/jackc/pgx/v5/pgxpool"
 )
 
 var _ domain.UserStore = (*UserStore)(nil)
 
 type UserStore struct {
-	conn *pgx.Conn
+	pool *pgxpool.Pool
 }
 
-func NewUserStore(conn *pgx.Conn) *UserStore {
+func NewUserStore(pool *pgxpool.Pool) *UserStore {
 	return &UserStore{
-		conn: conn,
+		pool: pool,
 	}
 }
 
@@ -24,7 +25,7 @@ func (u *UserStore) CreateUser(ctx context.Context, tenantID int, data domain.Us
 	query := `INSERT INTO users (tenant_id, first_name, last_name, email, password, role) 
 	VALUES ($1, $2, $3, $4, $5, $6) RETURNING *`
 
-	tx, err := u.conn.BeginTx(ctx, pgx.TxOptions{})
+	tx, err := u.pool.BeginTx(ctx, pgx.TxOptions{})
 	if err != nil {
 		return domain.User{}, err
 	}
@@ -34,6 +35,7 @@ func (u *UserStore) CreateUser(ctx context.Context, tenantID int, data domain.Us
 	if err != nil {
 		return domain.User{}, err
 	}
+	defer rows.Close()
 
 	user, err := pgx.CollectOneRow(rows, pgx.RowToStructByName[domain.User])
 	if err != nil {
@@ -49,7 +51,7 @@ func (u *UserStore) CreateUser(ctx context.Context, tenantID int, data domain.Us
 
 func (u *UserStore) GetUserByID(ctx context.Context, tenantID int, userID int) (domain.User, error) {
 	query := "SELECT * FROM users WHERE tenant_id=$1 AND id=$2"
-	tx, err := u.conn.BeginTx(ctx, pgx.TxOptions{})
+	tx, err := u.pool.BeginTx(ctx, pgx.TxOptions{})
 	if err != nil {
 		return domain.User{}, err
 	}
@@ -59,6 +61,7 @@ func (u *UserStore) GetUserByID(ctx context.Context, tenantID int, userID int) (
 	if err != nil {
 		return domain.User{}, err
 	}
+	defer rows.Close()
 
 	user, err := pgx.CollectOneRow(rows, pgx.RowToStructByName[domain.User])
 	if err != nil {
@@ -71,15 +74,31 @@ func (u *UserStore) GetUserByID(ctx context.Context, tenantID int, userID int) (
 	}
 	return user, nil
 }
+
 func (u *UserStore) UpdateUser(ctx context.Context, tenantID int, userID int, updates domain.UserUpdate) (domain.User, error) {
 	return domain.User{}, errors.New("data store method not implemented")
 }
+
 func (u *UserStore) DeleteUserByID(ctx context.Context, tenantID int, userID int) error {
-	return errors.New("data store method not implemented")
+	query := `DELETE FROM users WHERE tenant_id=$1 AND id=$2`
+	tx, err := u.pool.BeginTx(ctx, pgx.TxOptions{})
+	if err != nil {
+		return err
+	}
+	defer tx.Rollback(ctx)
+
+	rows, err := tx.Query(ctx, query, tenantID, userID)
+	if err != nil {
+		return err
+	}
+	defer rows.Close()
+
+	return tx.Commit(ctx)
 }
+
 func (u *UserStore) GetAllUsers(ctx context.Context, tenantID int) ([]domain.User, error) {
 	query := "SELECT * FROM users"
-	tx, err := u.conn.BeginTx(ctx, pgx.TxOptions{})
+	tx, err := u.pool.BeginTx(ctx, pgx.TxOptions{})
 	if err != nil {
 		return []domain.User{}, err
 	}
@@ -89,6 +108,7 @@ func (u *UserStore) GetAllUsers(ctx context.Context, tenantID int) ([]domain.Use
 	if err != nil {
 		return []domain.User{}, err
 	}
+	defer rows.Close()
 
 	users, err := pgx.CollectRows(rows, pgx.RowToStructByName[domain.User])
 	if err != nil {

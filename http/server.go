@@ -5,7 +5,7 @@ import (
 	"net/http"
 
 	"github.com/emanuelquerty/gymulty/postgres"
-	"github.com/jackc/pgx/v5"
+	"github.com/jackc/pgx/v5/pgxpool"
 )
 
 type middleware func(logger *slog.Logger, handler http.Handler) http.Handler
@@ -17,9 +17,9 @@ type Server struct {
 	middlewares   []middleware
 }
 
-func NewServer(conn *pgx.Conn, logger *slog.Logger) *Server {
-	tenantStore := postgres.NewTenantStore(conn)
-	userStore := postgres.NewUserStore(conn)
+func NewServer(pool *pgxpool.Pool, logger *slog.Logger) *Server {
+	tenantStore := postgres.NewTenantStore(pool)
+	userStore := postgres.NewUserStore(pool)
 
 	tenantHandler := NewTenantHandler(logger, tenantStore, userStore)
 

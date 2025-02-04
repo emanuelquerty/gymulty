@@ -42,8 +42,8 @@ type PublicUser struct {
 // UserUpdates enables user to update one or more fields
 // fields not nil are updated
 type UserUpdate struct {
-	Firstname *string `json:"firstname,omitempty"  bson:"firstname"`
-	Lastname  *string `json:"lastname,omitempty"  bson:"lastname"`
+	FirstName *string `json:"first_name,omitempty"  bson:"first_name"`
+	LastName  *string `json:"last_name,omitempty"  bson:"last_name"`
 	Email     *string `json:"email,omitempty"  bson:"email"`
 	Role      *string `json:"role,omitempty"  bson:"role"`
 	Password  *string `json:"password,omitempty"  bson:"password"`
