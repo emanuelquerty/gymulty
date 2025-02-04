@@ -1,7 +1,9 @@
 package http
 
 import (
+	"database/sql"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"log/slog"
 	"net/http"
@@ -37,22 +39,23 @@ func (u *UserHandler) registerRoutes(router *http.ServeMux) {
 }
 
 func (u *UserHandler) getUserByID(w http.ResponseWriter, r *http.Request) *appError {
-	tID := r.PathValue("tenantID")
-	uID := r.PathValue("userID")
-
-	userID, err := strconv.Atoi(uID)
+	e := &appError{Logger: u.logger}
+	userID, err := strconv.Atoi(r.PathValue("userID"))
 	if err != nil {
-		return &appError{Error: err, Message: "invalid user id", Code: 400, Logger: u.logger}
+		return e.withContext(err, "Invalid user id", ErrBadRequest)
 	}
 
-	tenantID, err := strconv.Atoi(tID)
+	tenantID, err := strconv.Atoi(r.PathValue("tenantID"))
 	if err != nil {
-		return &appError{Error: err, Message: "invalid tenant id", Code: 400, Logger: u.logger}
+		return e.withContext(err, "Invalid tenant id", ErrBadRequest)
 	}
 
 	user, err := u.store.GetUserByID(r.Context(), tenantID, userID)
 	if err != nil {
-		return &appError{Error: err, Message: "user was not found", Code: 404, Logger: u.logger}
+		if errors.Is(err, sql.ErrNoRows) {
+			return e.withContext(err, "A user with specified id was not found", ErrNotFound)
+		}
+		return e.withContext(err, "An internal server error ocurred. Please try again later", ErrInternal)
 	}
 
 	res := Response[domain.PublicUser]{
@@ -67,10 +70,11 @@ func (u *UserHandler) getUserByID(w http.ResponseWriter, r *http.Request) *appEr
 }
 
 func (u *UserHandler) createUser(w http.ResponseWriter, r *http.Request) *appError {
-	tID := r.PathValue("tenantID")
-	tenantID, err := strconv.Atoi(tID)
+	tenantID, err := strconv.Atoi(r.PathValue("tenantID"))
+
+	e := &appError{Logger: u.logger}
 	if err != nil {
-		return &appError{Error: err, Message: "invalid tenant id", Code: 400, Logger: u.logger}
+		return e.withContext(err, "Invalid tenant id", ErrBadRequest)
 	}
 
 	var user domain.User
@@ -78,12 +82,15 @@ func (u *UserHandler) createUser(w http.ResponseWriter, r *http.Request) *appErr
 
 	err = user.HashPassword()
 	if err != nil {
-		return &appError{Error: err, Message: "could not create user", Code: 500, Logger: u.logger}
+		return e.withContext(err, "An internal server error ocurred. Please try again later", ErrInternal)
 	}
 
 	newUser, err := u.store.CreateUser(r.Context(), tenantID, user)
 	if err != nil {
-		return &appError{Error: err, Message: "could not create user", Code: 500, Logger: u.logger}
+		if errors.Is(err, sql.ErrNoRows) {
+			return e.withContext(err, "A tenant with specified id was not found", ErrNotFound)
+		}
+		return e.withContext(err, "An internal server error ocurred. Please try again later", ErrInternal)
 	}
 
 	res := Response[domain.PublicUser]{
@@ -101,17 +108,15 @@ func (u *UserHandler) createUser(w http.ResponseWriter, r *http.Request) *appErr
 }
 
 func (u *UserHandler) updateUser(w http.ResponseWriter, r *http.Request) *appError {
-	tID := r.PathValue("tenantID")
-	uID := r.PathValue("userID")
-
-	userID, err := strconv.Atoi(uID)
+	e := &appError{Logger: u.logger}
+	userID, err := strconv.Atoi(r.PathValue("userID"))
 	if err != nil {
-		return &appError{Error: err, Message: "invalid user id", Code: 400, Logger: u.logger}
+		return e.withContext(err, "Invalid user id", ErrBadRequest)
 	}
 
-	tenantID, err := strconv.Atoi(tID)
+	tenantID, err := strconv.Atoi(r.PathValue("tenantID"))
 	if err != nil {
-		return &appError{Error: err, Message: "invalid tenant id", Code: 400, Logger: u.logger}
+		return e.withContext(err, "Invalid tenant id", ErrBadRequest)
 	}
 
 	var update domain.UserUpdate
@@ -119,7 +124,10 @@ func (u *UserHandler) updateUser(w http.ResponseWriter, r *http.Request) *appErr
 
 	user, err := u.store.UpdateUser(r.Context(), tenantID, userID, update)
 	if err != nil {
-		return &appError{Error: err, Message: "could not update user", Code: 404, Logger: u.logger}
+		if errors.Is(err, sql.ErrNoRows) {
+			return e.withContext(err, " A user with specified id was not found", ErrNotFound)
+		}
+		return e.withContext(err, "An internal server error ocurred. Please try again later", ErrInternal)
 	}
 
 	res := Response[domain.PublicUser]{
@@ -133,38 +141,48 @@ func (u *UserHandler) updateUser(w http.ResponseWriter, r *http.Request) *appErr
 }
 
 func (u *UserHandler) deleteUserByID(w http.ResponseWriter, r *http.Request) *appError {
-	tID := r.PathValue("tenantID")
-	uID := r.PathValue("userID")
-
-	userID, err := strconv.Atoi(uID)
+	e := &appError{Logger: u.logger}
+	userID, err := strconv.Atoi(r.PathValue("userID"))
 	if err != nil {
-		return &appError{Error: err, Message: "invalid user id", Code: 400, Logger: u.logger}
+		return e.withContext(err, "Invalid user id", ErrBadRequest)
 	}
 
-	tenantID, err := strconv.Atoi(tID)
+	tenantID, err := strconv.Atoi(r.PathValue("tenantID"))
 	if err != nil {
-		return &appError{Error: err, Message: "invalid tenant id", Code: 400, Logger: u.logger}
+		return e.withContext(err, "Invalid tenant id", ErrBadRequest)
 	}
 
 	err = u.store.DeleteUserByID(r.Context(), tenantID, userID)
 	if err != nil {
-		return &appError{Error: err, Message: "could not delete user", Code: 404, Logger: u.logger}
+		if errors.Is(err, sql.ErrNoRows) {
+			return e.withContext(err, " A user with specified id was not found", ErrNotFound)
+		}
+		return e.withContext(err, "An internal server error ocurred. Please try again later", ErrInternal)
 	}
 	w.WriteHeader(http.StatusNoContent)
+	res := Response[domain.PublicUser]{
+		Success: true,
+		Count:   1,
+		Type:    "users",
+		Data:    domain.PublicUser{},
+	}
+	json.NewEncoder(w).Encode(res)
 	return nil
 }
 
 func (u *UserHandler) getAllUsers(w http.ResponseWriter, r *http.Request) *appError {
-	tID := r.PathValue("tenantID")
-
-	tenantID, err := strconv.Atoi(tID)
+	e := &appError{Logger: u.logger}
+	tenantID, err := strconv.Atoi(r.PathValue("tenantID"))
 	if err != nil {
-		return &appError{Error: err, Message: "invalid tenant id", Code: 400, Logger: u.logger}
+		return e.withContext(err, "Invalid tenant id", ErrBadRequest)
 	}
 
 	users, err := u.store.GetAllUsers(r.Context(), tenantID)
 	if err != nil {
-		return &appError{Error: err, Message: "could not retrieve users", Code: 404, Logger: u.logger}
+		if errors.Is(err, sql.ErrNoRows) {
+			return e.withContext(err, "Could not find any users", ErrNotFound)
+		}
+		return e.withContext(err, "An internal server error ocurred. Please try again later", ErrInternal)
 	}
 
 	userCount := len(users)

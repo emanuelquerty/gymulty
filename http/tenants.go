@@ -1,7 +1,9 @@
 package http
 
 import (
+	"database/sql"
 	"encoding/json"
+	"errors"
 	"log/slog"
 	"net/http"
 
@@ -44,8 +46,9 @@ func (t *TenantHandler) createTenant(w http.ResponseWriter, r *http.Request) *ap
 		Subdomain:    body.Subdomain,
 	}
 	newTenant, err := t.tenantStore.CreateTenant(r.Context(), tenant)
+	e := &appError{Logger: t.logger}
 	if err != nil {
-		return &appError{Error: err, Message: "could not create tenant", Code: 400, Logger: t.logger}
+		return e.withContext(err, "An internal server error ocurred. Please try again later", ErrInternal)
 	}
 
 	userBody := domain.User{
@@ -58,12 +61,15 @@ func (t *TenantHandler) createTenant(w http.ResponseWriter, r *http.Request) *ap
 	}
 	err = userBody.HashPassword()
 	if err != nil {
-		return &appError{Error: err, Message: "could not create tenant", Code: 500, Logger: t.logger}
+		return e.withContext(err, "An internal server error ocurred. Please try again later", ErrInternal)
 	}
 
 	newUser, err := t.userStore.CreateUser(r.Context(), newTenant.ID, userBody)
 	if err != nil {
-		return &appError{Error: err, Message: "could not create user for given tenant", Code: 400, Logger: t.logger}
+		if errors.Is(err, sql.ErrNoRows) {
+			return e.withContext(err, "A tenant with specified id was not found", ErrNotFound)
+		}
+		return e.withContext(err, "An internal server error ocurred. Please try again later", ErrInternal)
 	}
 
 	res := Response[TenantSignupResponse]{
