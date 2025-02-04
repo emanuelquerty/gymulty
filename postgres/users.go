@@ -2,7 +2,6 @@ package postgres
 
 import (
 	"context"
-	"errors"
 
 	"github.com/emanuelquerty/gymulty/domain"
 	"github.com/jackc/pgx/v5"
@@ -76,7 +75,26 @@ func (u *UserStore) GetUserByID(ctx context.Context, tenantID int, userID int) (
 }
 
 func (u *UserStore) UpdateUser(ctx context.Context, tenantID int, userID int, updates domain.UserUpdate) (domain.User, error) {
-	return domain.User{}, errors.New("data store method not implemented")
+	query, columnValues := buildUserUpdateQuery(tenantID, userID, updates)
+
+	tx, err := u.pool.BeginTx(ctx, pgx.TxOptions{})
+	if err != nil {
+		return domain.User{}, err
+	}
+	defer tx.Rollback(ctx)
+
+	rows, err := u.pool.Query(ctx, query, columnValues...)
+	if err != nil {
+		return domain.User{}, err
+	}
+	defer rows.Close()
+
+	updatedUser, err := pgx.CollectOneRow(rows, pgx.RowToStructByName[domain.User])
+	if err != nil {
+		return domain.User{}, err
+	}
+	return updatedUser, nil
+
 }
 
 func (u *UserStore) DeleteUserByID(ctx context.Context, tenantID int, userID int) error {

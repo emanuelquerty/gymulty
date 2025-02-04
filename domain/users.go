@@ -3,8 +3,6 @@ package domain
 import (
 	"context"
 	"time"
-
-	"golang.org/x/crypto/bcrypt"
 )
 
 type User struct {
@@ -17,16 +15,6 @@ type User struct {
 	Role      string    `json:"role,omitempty"  bson:"role"`
 	CreatedAt time.Time `json:"created_at,omitempty"  bson:"created_at"`
 	UpdatedAt time.Time `json:"updated_at,omitempty"  bson:"updated_at"`
-}
-
-func (u *User) HashPassword() error {
-	password := []byte(u.Password)
-	hash, err := bcrypt.GenerateFromPassword(password, bcrypt.DefaultCost)
-	if err != nil {
-		return err
-	}
-	u.Password = string(hash)
-	return nil
 }
 
 type PublicUser struct {

@@ -59,7 +59,7 @@ func (t *TenantHandler) createTenant(w http.ResponseWriter, r *http.Request) *ap
 		Password:  body.Password,
 		Role:      "admin",
 	}
-	err = userBody.HashPassword()
+	userBody.Password, err = HashPassword(userBody.Password)
 	if err != nil {
 		return e.withContext(err, "An internal server error ocurred. Please try again later", ErrInternal)
 	}

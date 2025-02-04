@@ -81,7 +81,7 @@ func (u *UserHandler) createUser(w http.ResponseWriter, r *http.Request) *appErr
 	var user domain.User
 	json.NewDecoder(r.Body).Decode(&user)
 
-	err = user.HashPassword()
+	user.Password, err = HashPassword(user.Password)
 	if err != nil {
 		return e.withContext(err, "An internal server error ocurred. Please try again later", ErrInternal)
 	}
@@ -122,6 +122,14 @@ func (u *UserHandler) updateUser(w http.ResponseWriter, r *http.Request) *appErr
 
 	var update domain.UserUpdate
 	json.NewDecoder(r.Body).Decode(&update)
+
+	if update.Password != nil {
+		hash, err := HashPassword(*update.Password)
+		if err != nil {
+			return e.withContext(err, "An internal server error ocurred. Please try again later", ErrInternal)
+		}
+		update.Password = &hash
+	}
 
 	user, err := u.store.UpdateUser(r.Context(), tenantID, userID, update)
 	if err != nil {
