@@ -20,6 +20,9 @@ func main() {
 	}
 
 	server := http.NewServer(conn, logger)
+
+	server.Use(http.MiddlewareLogger)
+
 	if err = server.ListenAndServe("8080"); err != nil {
 		logger.Error(err.Error())
 	}

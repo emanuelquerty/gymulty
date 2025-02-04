@@ -8,10 +8,13 @@ import (
 	"github.com/jackc/pgx/v5"
 )
 
+type middleware func(logger *slog.Logger, handler http.Handler) http.Handler
+
 type Server struct {
 	tenantHandler TenantHandler
 	router        http.Handler
 	logger        *slog.Logger
+	middlewares   []middleware
 }
 
 func NewServer(conn *pgx.Conn, logger *slog.Logger) *Server {
@@ -36,10 +39,22 @@ func (s *Server) registerRoutes(router *http.ServeMux) {
 	router.Handle("/api/tenants/", s.tenantHandler)
 }
 
+func (s *Server) Use(m middleware) {
+	s.middlewares = append(s.middlewares, m)
+}
+
+func (s *Server) registerGlobalMiddlewares() http.Handler {
+	handler := s.router
+	for _, m := range s.middlewares {
+		handler = m(s.logger, handler)
+	}
+	return handler
+}
+
 func (s *Server) ListenAndServe(port string) error {
 	server := &http.Server{
 		Addr:    ":" + port,
-		Handler: s.router,
+		Handler: s.registerGlobalMiddlewares(),
 	}
 	s.logger.Info("server is running", slog.String("port", port))
 	return server.ListenAndServe()
