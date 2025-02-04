@@ -1,4 +1,4 @@
-package http
+package middleware
 
 import (
 	"fmt"
@@ -18,6 +18,7 @@ func (lrw *loggingResponseWritter) Header() http.Header {
 }
 
 func (lrw *loggingResponseWritter) WriteHeader(statusCode int) {
+	lrw.statusCode = statusCode
 	lrw.w.WriteHeader(statusCode)
 }
 
@@ -26,7 +27,7 @@ func (lrw *loggingResponseWritter) Write(b []byte) (int, error) {
 	return lrw.w.Write(b)
 }
 
-func MiddlewareLogger(logger *slog.Logger, fn http.Handler) http.Handler {
+func Logger(logger *slog.Logger, fn http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		lrw := &loggingResponseWritter{w: w}
 

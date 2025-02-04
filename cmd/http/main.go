@@ -5,6 +5,7 @@ import (
 	"os"
 
 	"github.com/emanuelquerty/gymulty/http"
+	"github.com/emanuelquerty/gymulty/http/middleware"
 	"github.com/emanuelquerty/gymulty/postgres"
 )
 
@@ -21,7 +22,7 @@ func main() {
 
 	server := http.NewServer(conn, logger)
 
-	server.Use(http.MiddlewareLogger)
+	server.Use(middleware.Logger)
 
 	if err = server.ListenAndServe("8080"); err != nil {
 		logger.Error(err.Error())
