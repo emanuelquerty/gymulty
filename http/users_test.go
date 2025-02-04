@@ -164,8 +164,10 @@ func TestCreateUser(t *testing.T) {
 		var got Response[domain.PublicUser]
 		json.NewDecoder(res.Body).Decode(&got)
 
+		message := "user was created successfully"
 		want := Response[domain.PublicUser]{
 			Success: true,
+			Message: &message,
 			Count:   1,
 			Type:    "users",
 			Data: domain.PublicUser{
@@ -225,8 +227,10 @@ func TestUpdateUser(t *testing.T) {
 			return updatedUser, nil
 		}
 
+		message := "user was updated successfully"
 		want := Response[domain.PublicUser]{
 			Success: true,
+			Message: &message,
 			Count:   1,
 			Type:    "users",
 			Data: domain.PublicUser{
@@ -279,7 +283,7 @@ func TestUpdateUser(t *testing.T) {
 }
 
 func TestDelete(t *testing.T) {
-	t.Run("returns 204 on success", func(t *testing.T) {
+	t.Run("returns 200 on success", func(t *testing.T) {
 		req := httptest.NewRequest("DELETE", "/api/tenants/1/users/2", nil)
 		userstore := new(mock.UserStore)
 		userstore.DeleteByIDFn = func(ctx context.Context, tenantID int, userID int) error {
@@ -288,7 +292,7 @@ func TestDelete(t *testing.T) {
 
 		res := newUserRequest(userstore, req)
 		got := res.Code
-		want := 204
+		want := 200
 		assert.Equal(t, want, got, "status codes should be equal")
 	})
 

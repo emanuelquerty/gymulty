@@ -3,10 +3,11 @@ package http
 import "github.com/emanuelquerty/gymulty/domain"
 
 type Response[T any] struct {
-	Success bool   `json:"success,omitempty"  bson:"success"`
-	Count   int    `json:"count,omitempty"  bson:"count"`
-	Type    string `json:"type,omitempty"  bson:"type"`
-	Data    T      `json:"data,omitempty"  bson:"data"`
+	Success bool    `json:"success,omitempty"  bson:"success"`
+	Message *string `json:"message,omitempty"  bson:"message"`
+	Count   int     `json:"count,omitempty"  bson:"count"`
+	Type    string  `json:"type,omitempty"  bson:"type"`
+	Data    T       `json:"data,omitempty"  bson:"data"`
 }
 
 type TenantSignupResponse struct {

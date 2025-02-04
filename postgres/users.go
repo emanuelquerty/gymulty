@@ -34,7 +34,6 @@ func (u *UserStore) CreateUser(ctx context.Context, tenantID int, data domain.Us
 	if err != nil {
 		return domain.User{}, err
 	}
-	defer rows.Close()
 
 	user, err := pgx.CollectOneRow(rows, pgx.RowToStructByName[domain.User])
 	if err != nil {
@@ -60,7 +59,6 @@ func (u *UserStore) GetUserByID(ctx context.Context, tenantID int, userID int) (
 	if err != nil {
 		return domain.User{}, err
 	}
-	defer rows.Close()
 
 	user, err := pgx.CollectOneRow(rows, pgx.RowToStructByName[domain.User])
 	if err != nil {
@@ -87,7 +85,6 @@ func (u *UserStore) UpdateUser(ctx context.Context, tenantID int, userID int, up
 	if err != nil {
 		return domain.User{}, err
 	}
-	defer rows.Close()
 
 	updatedUser, err := pgx.CollectOneRow(rows, pgx.RowToStructByName[domain.User])
 	if err != nil {
@@ -109,7 +106,7 @@ func (u *UserStore) DeleteUserByID(ctx context.Context, tenantID int, userID int
 	if err != nil {
 		return err
 	}
-	defer rows.Close()
+	rows.Close()
 
 	return tx.Commit(ctx)
 }
@@ -126,7 +123,6 @@ func (u *UserStore) GetAllUsers(ctx context.Context, tenantID int) ([]domain.Use
 	if err != nil {
 		return []domain.User{}, err
 	}
-	defer rows.Close()
 
 	users, err := pgx.CollectRows(rows, pgx.RowToStructByName[domain.User])
 	if err != nil {

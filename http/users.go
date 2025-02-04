@@ -94,7 +94,9 @@ func (u *UserHandler) createUser(w http.ResponseWriter, r *http.Request) *appErr
 		return e.withContext(err, "An internal server error ocurred. Please try again later", ErrInternal)
 	}
 
+	message := "user was created successfully"
 	res := Response[domain.PublicUser]{
+		Message: &message,
 		Success: true,
 		Count:   1,
 		Type:    "users",
@@ -139,8 +141,10 @@ func (u *UserHandler) updateUser(w http.ResponseWriter, r *http.Request) *appErr
 		return e.withContext(err, "An internal server error ocurred. Please try again later", ErrInternal)
 	}
 
+	message := "user was updated successfully"
 	res := Response[domain.PublicUser]{
 		Success: true,
+		Message: &message,
 		Count:   1,
 		Type:    "users",
 		Data:    MapToPublicUser(user),
@@ -169,13 +173,15 @@ func (u *UserHandler) deleteUserByID(w http.ResponseWriter, r *http.Request) *ap
 		}
 		return e.withContext(err, "An internal server error ocurred. Please try again later", ErrInternal)
 	}
-	res := Response[domain.PublicUser]{
+	message := "user was deleted successfully"
+	res := Response[any]{
 		Success: true,
 		Count:   1,
 		Type:    "users",
-		Data:    domain.PublicUser{},
+		Data:    nil,
+		Message: &message,
 	}
-	w.WriteHeader(http.StatusNoContent)
+	w.WriteHeader(http.StatusOK)
 	json.NewEncoder(w).Encode(res)
 	return nil
 }
