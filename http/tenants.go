@@ -73,9 +73,7 @@ func (t *TenantHandler) createTenant(w http.ResponseWriter, r *http.Request) *ap
 	}
 
 	res := Response[TenantSignupResponse]{
-		Success: true,
-		Count:   1,
-		Type:    "tenants",
+		Count: 1,
 		Data: TenantSignupResponse{
 			Message: "tenant registered successfully",
 			Tenant:  newTenant,

@@ -46,19 +46,19 @@ func TestGetUser(t *testing.T) {
 		req := httptest.NewRequest("GET", "/api/tenants/1/users/7", nil)
 		res := newUserRequest(userStore, req)
 
-		var got Response[domain.PublicUser]
+		var got Response[[]domain.PublicUser]
 		json.NewDecoder(res.Body).Decode(&got)
 
-		want := Response[domain.PublicUser]{
-			Success: true,
-			Count:   1,
-			Type:    "users",
-			Data: domain.PublicUser{
-				ID:        7,
-				TenantID:  1,
-				FirstName: "Peter",
-				LastName:  "Petrelli",
-				Role:      "admin",
+		want := Response[[]domain.PublicUser]{
+			Count: 1,
+			Data: []domain.PublicUser{
+				{
+					ID:        7,
+					TenantID:  1,
+					FirstName: "Peter",
+					LastName:  "Petrelli",
+					Role:      "admin",
+				},
 			},
 		}
 		assert.Equal(t, want, got, "users should be equal")
@@ -78,19 +78,19 @@ func TestGetUser(t *testing.T) {
 		req := httptest.NewRequest("GET", "/api/tenants/1/users/2", nil)
 		res := newUserRequest(userStore, req)
 
-		var got Response[domain.PublicUser]
+		var got Response[[]domain.PublicUser]
 		json.NewDecoder(res.Body).Decode(&got)
 
-		want := Response[domain.PublicUser]{
-			Success: true,
-			Count:   1,
-			Type:    "users",
-			Data: domain.PublicUser{
-				ID:        2,
-				TenantID:  1,
-				FirstName: "Bruce",
-				LastName:  "Banner",
-				Role:      "trainer",
+		want := Response[[]domain.PublicUser]{
+			Count: 1,
+			Data: []domain.PublicUser{
+				{
+					ID:        2,
+					TenantID:  1,
+					FirstName: "Bruce",
+					LastName:  "Banner",
+					Role:      "trainer",
+				},
 			},
 		}
 		assert.Equal(t, want, got, "users should be equal")
@@ -161,23 +161,21 @@ func TestCreateUser(t *testing.T) {
 		req := httptest.NewRequest(http.MethodPost, "/api/tenants/1/users", bodyBuff)
 		res := newUserRequest(userStore, req)
 
-		var got Response[domain.PublicUser]
+		var got Response[[]domain.PublicUser]
 		json.NewDecoder(res.Body).Decode(&got)
 
-		message := "user was created successfully"
-		want := Response[domain.PublicUser]{
-			Success: true,
-			Message: &message,
-			Count:   1,
-			Type:    "users",
-			Data: domain.PublicUser{
-				ID:        user.ID,
-				TenantID:  user.TenantID,
-				FirstName: user.FirstName,
-				LastName:  user.LastName,
-				Role:      user.Role,
-				CreatedAt: user.CreatedAt,
-				UpdatedAt: user.UpdatedAt,
+		want := Response[[]domain.PublicUser]{
+			Count: 1,
+			Data: []domain.PublicUser{
+				{
+					ID:        user.ID,
+					TenantID:  user.TenantID,
+					FirstName: user.FirstName,
+					LastName:  user.LastName,
+					Role:      user.Role,
+					CreatedAt: user.CreatedAt,
+					UpdatedAt: user.UpdatedAt,
+				},
 			},
 		}
 		assert.Equal(t, want, got, "users should be equal")
@@ -227,20 +225,18 @@ func TestUpdateUser(t *testing.T) {
 			return updatedUser, nil
 		}
 
-		message := "user was updated successfully"
-		want := Response[domain.PublicUser]{
-			Success: true,
-			Message: &message,
-			Count:   1,
-			Type:    "users",
-			Data: domain.PublicUser{
-				ID:        user.ID,
-				TenantID:  user.TenantID,
-				FirstName: *update.FirstName, // updated field
-				LastName:  user.LastName,
-				Role:      *update.Role, // updated field
-				CreatedAt: user.CreatedAt,
-				UpdatedAt: user.UpdatedAt,
+		want := Response[[]domain.PublicUser]{
+			Count: 1,
+			Data: []domain.PublicUser{
+				{
+					ID:        user.ID,
+					TenantID:  user.TenantID,
+					FirstName: *update.FirstName, // updated field
+					LastName:  user.LastName,
+					Role:      *update.Role, // updated field
+					CreatedAt: user.CreatedAt,
+					UpdatedAt: user.UpdatedAt,
+				},
 			},
 		}
 
@@ -249,7 +245,7 @@ func TestUpdateUser(t *testing.T) {
 		req := httptest.NewRequest(http.MethodPut, "/api/tenants/1/users/3", bodyBuff)
 		res := newUserRequest(userStore, req)
 
-		var got Response[domain.PublicUser]
+		var got Response[[]domain.PublicUser]
 		json.NewDecoder(res.Body).Decode(&got)
 		assert.Equal(t, want, got, "they should be equal")
 	})
@@ -283,7 +279,7 @@ func TestUpdateUser(t *testing.T) {
 }
 
 func TestDelete(t *testing.T) {
-	t.Run("returns 200 on success", func(t *testing.T) {
+	t.Run("returns 204 on success", func(t *testing.T) {
 		req := httptest.NewRequest("DELETE", "/api/tenants/1/users/2", nil)
 		userstore := new(mock.UserStore)
 		userstore.DeleteByIDFn = func(ctx context.Context, tenantID int, userID int) error {
@@ -292,7 +288,7 @@ func TestDelete(t *testing.T) {
 
 		res := newUserRequest(userstore, req)
 		got := res.Code
-		want := 200
+		want := 204
 		assert.Equal(t, want, got, "status codes should be equal")
 	})
 
@@ -348,10 +344,8 @@ func TestGetAllUsers(t *testing.T) {
 		json.NewDecoder(res.Body).Decode(&got)
 
 		want := Response[[]domain.PublicUser]{
-			Success: true,
-			Count:   1,
-			Type:    "users",
-			Data:    MapToPublicUsers(users),
+			Count: 1,
+			Data:  MapToPublicUsers(users),
 		}
 
 		assert.Equal(t, want, got, "responses should match")

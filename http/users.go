@@ -58,11 +58,11 @@ func (u *UserHandler) getUserByID(w http.ResponseWriter, r *http.Request) *appEr
 		return e.withContext(err, "An internal server error ocurred. Please try again later", ErrInternal)
 	}
 
-	res := Response[domain.PublicUser]{
-		Success: true,
-		Count:   1,
-		Type:    "users",
-		Data:    MapToPublicUser(user),
+	res := Response[[]domain.PublicUser]{
+		Count: 1,
+		Data: []domain.PublicUser{
+			MapToPublicUser(user),
+		},
 	}
 
 	w.WriteHeader(http.StatusOK)
@@ -94,13 +94,11 @@ func (u *UserHandler) createUser(w http.ResponseWriter, r *http.Request) *appErr
 		return e.withContext(err, "An internal server error ocurred. Please try again later", ErrInternal)
 	}
 
-	message := "user was created successfully"
-	res := Response[domain.PublicUser]{
-		Message: &message,
-		Success: true,
-		Count:   1,
-		Type:    "users",
-		Data:    MapToPublicUser(newUser),
+	res := Response[[]domain.PublicUser]{
+		Count: 1,
+		Data: []domain.PublicUser{
+			MapToPublicUser(newUser),
+		},
 	}
 	resourceURI := fmt.Sprintf("%s://%s%s/%d", r.URL.Scheme, r.Host, r.URL.String(), newUser.ID)
 
@@ -141,13 +139,11 @@ func (u *UserHandler) updateUser(w http.ResponseWriter, r *http.Request) *appErr
 		return e.withContext(err, "An internal server error ocurred. Please try again later", ErrInternal)
 	}
 
-	message := "user was updated successfully"
-	res := Response[domain.PublicUser]{
-		Success: true,
-		Message: &message,
-		Count:   1,
-		Type:    "users",
-		Data:    MapToPublicUser(user),
+	res := Response[[]domain.PublicUser]{
+		Count: 1,
+		Data: []domain.PublicUser{
+			MapToPublicUser(user),
+		},
 	}
 	w.WriteHeader(http.StatusOK)
 	json.NewEncoder(w).Encode(res)
@@ -173,15 +169,12 @@ func (u *UserHandler) deleteUserByID(w http.ResponseWriter, r *http.Request) *ap
 		}
 		return e.withContext(err, "An internal server error ocurred. Please try again later", ErrInternal)
 	}
-	message := "user was deleted successfully"
+
 	res := Response[any]{
-		Success: true,
-		Count:   1,
-		Type:    "users",
-		Data:    nil,
-		Message: &message,
+		Count: 1,
+		Data:  nil,
 	}
-	w.WriteHeader(http.StatusOK)
+	w.WriteHeader(http.StatusNoContent)
 	json.NewEncoder(w).Encode(res)
 	return nil
 }
@@ -203,10 +196,8 @@ func (u *UserHandler) getAllUsers(w http.ResponseWriter, r *http.Request) *appEr
 
 	userCount := len(users)
 	res := Response[[]domain.PublicUser]{
-		Success: true,
-		Count:   userCount,
-		Type:    "users",
-		Data:    MapToPublicUsers(users),
+		Count: userCount,
+		Data:  MapToPublicUsers(users),
 	}
 
 	w.WriteHeader(http.StatusOK)

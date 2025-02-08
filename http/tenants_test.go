@@ -44,9 +44,7 @@ func TestCreateTenant(t *testing.T) {
 		res := newTenantRequest(tenantStore, userStore, req)
 
 		want := Response[TenantSignupResponse]{
-			Success: true,
-			Count:   1,
-			Type:    "tenants",
+			Count: 1,
 			Data: TenantSignupResponse{
 				Message: "tenant registered successfully",
 				Tenant: domain.Tenant{
