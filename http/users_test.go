@@ -350,6 +350,26 @@ func TestGetAllUsers(t *testing.T) {
 
 		assert.Equal(t, want, got, "responses should match")
 	})
+
+	t.Run("returns 200 status code and empty response for non-existing tenant", func(t *testing.T) {
+		userStore := new(mock.UserStore)
+		userStore.GetAllUsersFn = func(ctx context.Context, tenantID int) ([]domain.User, error) {
+			return []domain.User{}, nil
+		}
+
+		req := httptest.NewRequest("GET", "/api/tenants/999/users", nil)
+		res := newUserRequest(userStore, req)
+
+		wantCode := 200
+		gotCode := res.Code
+		assert.Equal(t, wantCode, gotCode, "status codes should be equal")
+
+		wantRes := Response[[]domain.PublicUser]{Data: []domain.PublicUser{}}
+		var gotRes Response[[]domain.PublicUser]
+		json.NewDecoder(res.Body).Decode(&gotRes)
+		assert.Equal(t, wantRes, gotRes, "json responses match")
+
+	})
 }
 
 func newUserRequest(userStore *mock.UserStore, req *http.Request) *httptest.ResponseRecorder {

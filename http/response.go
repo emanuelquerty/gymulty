@@ -3,8 +3,8 @@ package http
 import "github.com/emanuelquerty/gymulty/domain"
 
 type Response[T any] struct {
-	Count int `json:"count,omitempty"  bson:"count"`
-	Data  T   `json:"data,omitempty"  bson:"data"`
+	Count int `json:"count"  bson:"count"`
+	Data  T   `json:"data"  bson:"data"`
 }
 
 type TenantSignupResponse struct {

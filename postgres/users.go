@@ -123,7 +123,6 @@ func (u *UserStore) GetAllUsers(ctx context.Context, tenantID int) ([]domain.Use
 	if err != nil {
 		return []domain.User{}, err
 	}
-
 	users, err := pgx.CollectRows(rows, pgx.RowToStructByName[domain.User])
 	if err != nil {
 		return []domain.User{}, err
