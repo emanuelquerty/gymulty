@@ -370,6 +370,19 @@ func TestGetAllUsers(t *testing.T) {
 		assert.Equal(t, wantRes, gotRes, "json responses match")
 
 	})
+
+	t.Run("returns 400 status code for invalid tenant id", func(t *testing.T) {
+		userStore := new(mock.UserStore)
+		userStore.DeleteByIDFn = func(ctx context.Context, tenantID int, userID int) error {
+			return nil // this func is never called for this test, so return val here is irrelevant
+		}
+		req := httptest.NewRequest("GET", "/api/tenants/InvalidID/users", nil)
+		res := newUserRequest(userStore, req)
+
+		got := res.Code
+		want := 400
+		assert.Equal(t, want, got, "status codes should be equal")
+	})
 }
 
 func newUserRequest(userStore *mock.UserStore, req *http.Request) *httptest.ResponseRecorder {
