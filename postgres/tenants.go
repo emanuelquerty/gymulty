@@ -21,7 +21,10 @@ func NewTenantStore(pool *pgxpool.Pool) *TenantStore {
 }
 
 func (t *TenantStore) CreateTenant(ctx context.Context, data domain.Tenant) (domain.Tenant, error) {
-	query := "INSERT INTO tenants (business_name, subdomain) VALUES ($1, $2) RETURNING *"
+	query :=
+		`INSERT INTO tenants (business_name, subdomain) 
+		VALUES ($1, $2) 
+		RETURNING id, status, created_at, updated_at`
 
 	tx, err := t.pool.BeginTx(ctx, pgx.TxOptions{})
 	if err != nil {
@@ -35,7 +38,9 @@ func (t *TenantStore) CreateTenant(ctx context.Context, data domain.Tenant) (dom
 	}
 	defer rows.Close()
 
-	tenant, err := pgx.CollectOneRow(rows, pgx.RowToStructByName[domain.Tenant])
+	tenant, err := pgx.CollectOneRow(rows, pgx.RowToStructByNameLax[domain.Tenant])
+	tenant.BusinessName = data.BusinessName
+	tenant.Subdomain = data.Subdomain
 	if err != nil {
 		return domain.Tenant{}, err
 	}
