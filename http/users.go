@@ -188,9 +188,6 @@ func (u *UserHandler) getAllUsers(w http.ResponseWriter, r *http.Request) *appEr
 
 	users, err := u.store.GetAllUsers(r.Context(), tenantID)
 	if err != nil {
-		if errors.Is(err, sql.ErrNoRows) {
-			return e.withContext(err, "Could not find any users", ErrNotFound)
-		}
 		return e.withContext(err, "An internal server error ocurred. Please try again later", ErrInternal)
 	}
 
@@ -218,10 +215,10 @@ func MapToPublicUser(user domain.User) domain.PublicUser {
 }
 
 func MapToPublicUsers(users []domain.User) []domain.PublicUser {
-	var publicUsers []domain.PublicUser
+	pubUsers := []domain.PublicUser{} // we want to return empty slice when len(users)==0, not nil slice
 	for _, val := range users {
 		curr := MapToPublicUser(val)
-		publicUsers = append(publicUsers, curr)
+		pubUsers = append(pubUsers, curr)
 	}
-	return publicUsers
+	return pubUsers
 }
