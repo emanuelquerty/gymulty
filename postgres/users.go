@@ -112,14 +112,14 @@ func (u *UserStore) DeleteUserByID(ctx context.Context, tenantID int, userID int
 }
 
 func (u *UserStore) GetAllUsers(ctx context.Context, tenantID int) ([]domain.User, error) {
-	query := "SELECT * FROM users"
+	query := "SELECT * FROM users WHERE tenant_id=$1"
 	tx, err := u.pool.BeginTx(ctx, pgx.TxOptions{})
 	if err != nil {
 		return []domain.User{}, err
 	}
 	defer tx.Rollback(ctx)
 
-	rows, err := tx.Query(ctx, query)
+	rows, err := tx.Query(ctx, query, tenantID)
 	if err != nil {
 		return []domain.User{}, err
 	}
