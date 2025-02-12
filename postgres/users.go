@@ -21,8 +21,10 @@ func NewUserStore(pool *pgxpool.Pool) *UserStore {
 }
 
 func (u *UserStore) CreateUser(ctx context.Context, tenantID int, data domain.User) (domain.User, error) {
-	query := `INSERT INTO users (tenant_id, first_name, last_name, email, password, role) 
-	VALUES ($1, $2, $3, $4, $5, $6) RETURNING *`
+	query :=
+		`INSERT INTO users (tenant_id, first_name, last_name, email, password, role) 
+		VALUES ($1, $2, $3, $4, $5, $6) 
+		RETURNING id, created_at, updated_at`
 
 	tx, err := u.pool.BeginTx(ctx, pgx.TxOptions{})
 	if err != nil {
@@ -30,12 +32,10 @@ func (u *UserStore) CreateUser(ctx context.Context, tenantID int, data domain.Us
 	}
 	defer tx.Rollback(ctx)
 
-	rows, err := tx.Query(ctx, query, data.TenantID, data.FirstName, data.LastName, data.Email, data.Password, data.Role)
-	if err != nil {
-		return domain.User{}, err
-	}
+	row := tx.QueryRow(ctx, query, data.TenantID, data.FirstName, data.LastName, data.Email, data.Password, data.Role)
 
-	user, err := pgx.CollectOneRow(rows, pgx.RowToStructByName[domain.User])
+	user := data
+	err = row.Scan(&user.ID, &user.CreatedAt, &user.UpdatedAt)
 	if err != nil {
 		return domain.User{}, err
 	}
