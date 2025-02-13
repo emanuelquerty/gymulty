@@ -13,3 +13,11 @@ func Connect(dsn string) (*pgxpool.Pool, error) {
 	}
 	return pool, nil
 }
+
+type Store struct {
+	pool *pgxpool.Pool
+}
+
+func NewStore(pool *pgxpool.Pool) *Store {
+	return &Store{pool: pool}
+}

@@ -10,19 +10,20 @@ import (
 	"strconv"
 
 	"github.com/emanuelquerty/gymulty/domain"
+	"github.com/emanuelquerty/gymulty/http/middleware"
 )
 
 type UserHandler struct {
-	store domain.UserStore
+	store domain.Store
 	http.Handler
 	logger *slog.Logger
 }
 
-func NewUserHandler(logger *slog.Logger, store domain.UserStore) *UserHandler {
+func NewUserHandler(logger *slog.Logger, store domain.Store) *UserHandler {
 	router := http.NewServeMux()
 	userHandler := &UserHandler{
 		store:   store,
-		Handler: router,
+		Handler: middleware.StripSlashes(router),
 		logger:  logger,
 	}
 	userHandler.registerRoutes(router)

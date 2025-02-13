@@ -7,26 +7,6 @@ import (
 	"time"
 )
 
-type loggingResponseWritter struct {
-	w          http.ResponseWriter
-	statusCode int
-	bytesCount int
-}
-
-func (lrw *loggingResponseWritter) Header() http.Header {
-	return lrw.w.Header()
-}
-
-func (lrw *loggingResponseWritter) WriteHeader(statusCode int) {
-	lrw.statusCode = statusCode
-	lrw.w.WriteHeader(statusCode)
-}
-
-func (lrw *loggingResponseWritter) Write(b []byte) (int, error) {
-	lrw.bytesCount += len(b)
-	return lrw.w.Write(b)
-}
-
 func Logger(logger *slog.Logger, fn http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		lrw := &loggingResponseWritter{w: w}

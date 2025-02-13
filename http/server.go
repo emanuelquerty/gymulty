@@ -4,31 +4,27 @@ import (
 	"log/slog"
 	"net/http"
 
+	"github.com/emanuelquerty/gymulty/domain"
+	"github.com/emanuelquerty/gymulty/http/middleware"
 	"github.com/emanuelquerty/gymulty/postgres"
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
-type middleware func(logger *slog.Logger, handler http.Handler) http.Handler
-
 type Server struct {
-	tenantHandler TenantHandler
-	router        http.Handler
-	logger        *slog.Logger
-	middlewares   []middleware
+	router      http.Handler
+	logger      *slog.Logger
+	middlewares []middleware.Middleware
+	store       domain.Store
 }
 
 func NewServer(pool *pgxpool.Pool, logger *slog.Logger) *Server {
-	tenantStore := postgres.NewTenantStore(pool)
-	userStore := postgres.NewUserStore(pool)
-
-	tenantHandler := NewTenantHandler(logger, tenantStore, userStore)
-
+	store := postgres.NewStore(pool)
 	router := http.NewServeMux()
 
 	server := &Server{
-		tenantHandler: *tenantHandler,
-		router:        router,
-		logger:        logger,
+		router: router,
+		logger: logger,
+		store:  store,
 	}
 
 	server.registerRoutes(router)
@@ -36,10 +32,14 @@ func NewServer(pool *pgxpool.Pool, logger *slog.Logger) *Server {
 }
 
 func (s *Server) registerRoutes(router *http.ServeMux) {
-	router.Handle("/api/tenants/", s.tenantHandler)
+	tenantHandler := NewTenantHandler(s.logger, s.store)
+	userHandler := NewUserHandler(s.logger, s.store)
+
+	router.Handle("/api/tenants/", tenantHandler)
+	router.Handle("/api/tenants/{tenantID}/users/", userHandler)
 }
 
-func (s *Server) Use(m middleware) {
+func (s *Server) Use(m middleware.Middleware) {
 	s.middlewares = append(s.middlewares, m)
 }
 
