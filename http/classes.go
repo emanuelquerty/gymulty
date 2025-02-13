@@ -10,6 +10,7 @@ import (
 	"strconv"
 
 	"github.com/emanuelquerty/gymulty/domain"
+	"github.com/emanuelquerty/gymulty/http/middleware"
 )
 
 type ClassHandler struct {
@@ -22,7 +23,7 @@ func NewClassHandler(logger *slog.Logger, store domain.ClassStore) *ClassHandler
 	router := http.NewServeMux()
 
 	handler := &ClassHandler{
-		Handler: router,
+		Handler: middleware.StripSlashes(router),
 		store:   store,
 		logger:  logger,
 	}

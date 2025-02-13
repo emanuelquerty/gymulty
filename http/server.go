@@ -34,9 +34,11 @@ func NewServer(pool *pgxpool.Pool, logger *slog.Logger) *Server {
 func (s *Server) registerRoutes(router *http.ServeMux) {
 	tenantHandler := NewTenantHandler(s.logger, s.store)
 	userHandler := NewUserHandler(s.logger, s.store)
+	classHandler := NewClassHandler(s.logger, s.store)
 
 	router.Handle("/api/tenants/", tenantHandler)
 	router.Handle("/api/tenants/{tenantID}/users/", userHandler)
+	router.Handle("/api/tenants/{tenantID}/classes/", classHandler)
 }
 
 func (s *Server) Use(m middleware.Middleware) {
