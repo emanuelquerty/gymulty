@@ -43,20 +43,20 @@ func (u *UserHandler) getUserByID(w http.ResponseWriter, r *http.Request) *appEr
 	e := &appError{Logger: u.logger}
 	userID, err := strconv.Atoi(r.PathValue("userID"))
 	if err != nil {
-		return e.withContext(err, "Invalid user id", ErrBadRequest)
+		return e.withContext(err, "Invalid user id", ErrStatusBadRequest)
 	}
 
 	tenantID, err := strconv.Atoi(r.PathValue("tenantID"))
 	if err != nil {
-		return e.withContext(err, "Invalid tenant id", ErrBadRequest)
+		return e.withContext(err, "Invalid tenant id", ErrStatusBadRequest)
 	}
 
 	user, err := u.store.GetUserByID(r.Context(), tenantID, userID)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
-			return e.withContext(err, "A user with specified id was not found", ErrNotFound)
+			return e.withContext(err, "A user with specified id was not found", ErrStatusNotFound)
 		}
-		return e.withContext(err, "An internal server error ocurred. Please try again later", ErrInternal)
+		return e.withContext(err, "An internal server error ocurred. Please try again later", ErrStatusInternal)
 	}
 
 	res := Response[[]domain.PublicUser]{
@@ -76,7 +76,7 @@ func (u *UserHandler) createUser(w http.ResponseWriter, r *http.Request) *appErr
 
 	e := &appError{Logger: u.logger}
 	if err != nil {
-		return e.withContext(err, "Invalid tenant id", ErrBadRequest)
+		return e.withContext(err, "Invalid tenant id", ErrStatusBadRequest)
 	}
 
 	var user domain.User
@@ -84,15 +84,15 @@ func (u *UserHandler) createUser(w http.ResponseWriter, r *http.Request) *appErr
 
 	user.Password, err = HashPassword(user.Password)
 	if err != nil {
-		return e.withContext(err, "An internal server error ocurred. Please try again later", ErrInternal)
+		return e.withContext(err, "An internal server error ocurred. Please try again later", ErrStatusInternal)
 	}
 
 	newUser, err := u.store.CreateUser(r.Context(), tenantID, user)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
-			return e.withContext(err, "A tenant with specified id was not found", ErrNotFound)
+			return e.withContext(err, "A tenant with specified id was not found", ErrStatusNotFound)
 		}
-		return e.withContext(err, "An internal server error ocurred. Please try again later", ErrInternal)
+		return e.withContext(err, "An internal server error ocurred. Please try again later", ErrStatusInternal)
 	}
 
 	res := Response[[]domain.PublicUser]{
@@ -113,12 +113,12 @@ func (u *UserHandler) updateUser(w http.ResponseWriter, r *http.Request) *appErr
 	e := &appError{Logger: u.logger}
 	userID, err := strconv.Atoi(r.PathValue("userID"))
 	if err != nil {
-		return e.withContext(err, "Invalid user id", ErrBadRequest)
+		return e.withContext(err, "Invalid user id", ErrStatusBadRequest)
 	}
 
 	tenantID, err := strconv.Atoi(r.PathValue("tenantID"))
 	if err != nil {
-		return e.withContext(err, "Invalid tenant id", ErrBadRequest)
+		return e.withContext(err, "Invalid tenant id", ErrStatusBadRequest)
 	}
 
 	var update domain.UserUpdate
@@ -127,7 +127,7 @@ func (u *UserHandler) updateUser(w http.ResponseWriter, r *http.Request) *appErr
 	if update.Password != nil {
 		hash, err := HashPassword(*update.Password)
 		if err != nil {
-			return e.withContext(err, "An internal server error ocurred. Please try again later", ErrInternal)
+			return e.withContext(err, "An internal server error ocurred. Please try again later", ErrStatusInternal)
 		}
 		update.Password = &hash
 	}
@@ -135,9 +135,9 @@ func (u *UserHandler) updateUser(w http.ResponseWriter, r *http.Request) *appErr
 	user, err := u.store.UpdateUser(r.Context(), tenantID, userID, update)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
-			return e.withContext(err, " A user with specified id was not found", ErrNotFound)
+			return e.withContext(err, " A user with specified id was not found", ErrStatusNotFound)
 		}
-		return e.withContext(err, "An internal server error ocurred. Please try again later", ErrInternal)
+		return e.withContext(err, "An internal server error ocurred. Please try again later", ErrStatusInternal)
 	}
 
 	res := Response[[]domain.PublicUser]{
@@ -155,17 +155,17 @@ func (u *UserHandler) deleteUserByID(w http.ResponseWriter, r *http.Request) *ap
 	e := &appError{Logger: u.logger}
 	userID, err := strconv.Atoi(r.PathValue("userID"))
 	if err != nil {
-		return e.withContext(err, "Invalid user id", ErrBadRequest)
+		return e.withContext(err, "Invalid user id", ErrStatusBadRequest)
 	}
 
 	tenantID, err := strconv.Atoi(r.PathValue("tenantID"))
 	if err != nil {
-		return e.withContext(err, "Invalid tenant id", ErrBadRequest)
+		return e.withContext(err, "Invalid tenant id", ErrStatusBadRequest)
 	}
 
 	err = u.store.DeleteUserByID(r.Context(), tenantID, userID)
 	if err != nil {
-		return e.withContext(err, "An internal server error ocurred. Please try again later", ErrInternal)
+		return e.withContext(err, "An internal server error ocurred. Please try again later", ErrStatusInternal)
 	}
 
 	res := Response[any]{
@@ -181,12 +181,12 @@ func (u *UserHandler) getAllUsers(w http.ResponseWriter, r *http.Request) *appEr
 	e := &appError{Logger: u.logger}
 	tenantID, err := strconv.Atoi(r.PathValue("tenantID"))
 	if err != nil {
-		return e.withContext(err, "Invalid tenant id", ErrBadRequest)
+		return e.withContext(err, "Invalid tenant id", ErrStatusBadRequest)
 	}
 
 	users, err := u.store.GetAllUsers(r.Context(), tenantID)
 	if err != nil {
-		return e.withContext(err, "An internal server error ocurred. Please try again later", ErrInternal)
+		return e.withContext(err, "An internal server error ocurred. Please try again later", ErrStatusInternal)
 	}
 
 	userCount := len(users)

@@ -7,23 +7,23 @@ import (
 )
 
 const (
-	ErrInternal       = "INTERNAL_SERVER_ERROR"
-	ErrUnauthorized   = "UNAUTHORIZED"
-	ErrNotFound       = "NOT_FOUND"
-	ErrBadRequest     = "MALFORMED_REQUEST"
-	ErrForbidden      = "PERMISSION_DENIED"
-	ErrConflict       = "CONFLICT"
-	ErrNotImplemented = "NOT_IMPLEMENTED"
+	ErrStatusInternal       = "INTERNAL_SERVER_ERROR"
+	ErrStatusUnauthorized   = "UNAUTHORIZED"
+	ErrStatusNotFound       = "NOT_FOUND"
+	ErrStatusBadRequest     = "MALFORMED_REQUEST"
+	ErrStatusForbidden      = "PERMISSION_DENIED"
+	ErrStatusConflict       = "CONFLICT"
+	ErrStatusNotImplemented = "NOT_IMPLEMENTED"
 )
 
 var statusCode = map[string]int{
-	ErrInternal:       http.StatusInternalServerError,
-	ErrUnauthorized:   http.StatusUnauthorized,
-	ErrNotFound:       http.StatusNotFound,
-	ErrBadRequest:     http.StatusBadRequest,
-	ErrForbidden:      http.StatusForbidden,
-	ErrConflict:       http.StatusConflict,
-	ErrNotImplemented: http.StatusNotImplemented,
+	ErrStatusInternal:       http.StatusInternalServerError,
+	ErrStatusUnauthorized:   http.StatusUnauthorized,
+	ErrStatusNotFound:       http.StatusNotFound,
+	ErrStatusBadRequest:     http.StatusBadRequest,
+	ErrStatusForbidden:      http.StatusForbidden,
+	ErrStatusConflict:       http.StatusConflict,
+	ErrStatusNotImplemented: http.StatusNotImplemented,
 }
 
 type appError struct {
