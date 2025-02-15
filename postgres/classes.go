@@ -33,3 +33,29 @@ func (s *Store) CreateClass(ctx context.Context, tenantID int, data domain.Class
 	}
 	return class, nil
 }
+
+func (s *Store) GetClassByID(ctx context.Context, tenantID int, classID int) (domain.Class, error) {
+	query :=
+		`SELECT * FROM classes 
+		WHERE tenant_id=$1 AND id=$2`
+	tx, err := s.pool.BeginTx(ctx, pgx.TxOptions{})
+	if err != nil {
+		return domain.Class{}, nil
+	}
+	defer tx.Rollback(ctx)
+
+	rows, err := tx.Query(ctx, query, tenantID, classID)
+	if err != nil {
+		return domain.Class{}, nil
+	}
+
+	class, err := pgx.CollectOneRow(rows, pgx.RowToStructByName[domain.Class])
+	if err != nil {
+		return domain.Class{}, nil
+	}
+	err = tx.Commit(ctx)
+	if err != nil {
+		return domain.Class{}, nil
+	}
+	return class, nil
+}

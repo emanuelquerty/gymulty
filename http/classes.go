@@ -32,7 +32,8 @@ func NewClassHandler(logger *slog.Logger, store domain.ClassStore) *ClassHandler
 }
 
 func (c *ClassHandler) registerRoutes(router *http.ServeMux) {
-	router.Handle("GET /api/tenants/{tenantID}/classes", errorHandler(c.CreateClass))
+	router.Handle("POST /api/tenants/{tenantID}/classes", errorHandler(c.CreateClass))
+	router.Handle("GET /api/tenants/{tenantID}/classes/{classID}", errorHandler(c.GetClassByID))
 }
 
 func (c *ClassHandler) CreateClass(w http.ResponseWriter, r *http.Request) *appError {
@@ -57,7 +58,39 @@ func (c *ClassHandler) CreateClass(w http.ResponseWriter, r *http.Request) *appE
 	resourceURI := fmt.Sprintf("%s://%s%s/%d", r.URL.Scheme, r.Host, r.URL.String(), class.ID)
 	w.Header().Set("Location", resourceURI)
 
-	err = json.NewEncoder(w).Encode(class)
+	res := Response[[]domain.Class]{Count: 1, Data: []domain.Class{class}}
+	err = json.NewEncoder(w).Encode(res)
+	if err != nil {
+		return e.withContext(err, "An internal server error ocurred. Please try again later", ErrInternal)
+	}
+	return nil
+}
+
+func (c *ClassHandler) GetClassByID(w http.ResponseWriter, r *http.Request) *appError {
+	e := appError{Logger: c.logger}
+
+	tenantID, err := strconv.Atoi(r.PathValue("tenantID"))
+	if err != nil {
+		return e.withContext(err, "Invalid tenant id", ErrBadRequest)
+	}
+
+	classID, err := strconv.Atoi(r.PathValue("classID"))
+	if err != nil {
+		return e.withContext(err, "Invalid class id", ErrBadRequest)
+	}
+
+	class, err := c.store.GetClassByID(r.Context(), tenantID, classID)
+	fmt.Println("GET USER BY ID", class)
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			msg := fmt.Sprintf("class with id %d was not found", classID)
+			return e.withContext(err, msg, ErrNotFound)
+		}
+		return e.withContext(err, "An internal server error ocurred. Please try again later", ErrInternal)
+	}
+
+	res := Response[[]domain.Class]{Count: 1, Data: []domain.Class{class}}
+	err = json.NewEncoder(w).Encode(res)
 	if err != nil {
 		return e.withContext(err, "An internal server error ocurred. Please try again later", ErrInternal)
 	}
