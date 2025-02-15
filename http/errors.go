@@ -7,13 +7,13 @@ import (
 )
 
 const (
-	ErrStatusInternal       = "INTERNAL_SERVER_ERROR"
-	ErrStatusUnauthorized   = "UNAUTHORIZED"
-	ErrStatusNotFound       = "NOT_FOUND"
-	ErrStatusBadRequest     = "MALFORMED_REQUEST"
-	ErrStatusForbidden      = "PERMISSION_DENIED"
-	ErrStatusConflict       = "CONFLICT"
-	ErrStatusNotImplemented = "NOT_IMPLEMENTED"
+	ErrStatusInternal       = "internal_server_error"
+	ErrStatusUnauthorized   = "unauthorized"
+	ErrStatusNotFound       = "not_found"
+	ErrStatusBadRequest     = "malformed_request"
+	ErrStatusForbidden      = "permission_denied"
+	ErrStatusConflict       = "conflict"
+	ErrStatusNotImplemented = "not_implemented"
 )
 
 var statusCode = map[string]int{

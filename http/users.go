@@ -54,7 +54,7 @@ func (u *UserHandler) getUserByID(w http.ResponseWriter, r *http.Request) *appEr
 	user, err := u.store.GetUserByID(r.Context(), tenantID, userID)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
-			return e.withContext(err, "A user with specified id was not found", ErrStatusNotFound)
+			return e.withContext(err, "Unknown tenant or user id", ErrStatusNotFound)
 		}
 		return e.withContext(err, "An internal server error ocurred. Please try again later", ErrStatusInternal)
 	}
@@ -90,7 +90,7 @@ func (u *UserHandler) createUser(w http.ResponseWriter, r *http.Request) *appErr
 	newUser, err := u.store.CreateUser(r.Context(), tenantID, user)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
-			return e.withContext(err, "A tenant with specified id was not found", ErrStatusNotFound)
+			return e.withContext(err, "Unknown tenant id", ErrStatusNotFound)
 		}
 		return e.withContext(err, "An internal server error ocurred. Please try again later", ErrStatusInternal)
 	}
@@ -135,7 +135,7 @@ func (u *UserHandler) updateUser(w http.ResponseWriter, r *http.Request) *appErr
 	user, err := u.store.UpdateUser(r.Context(), tenantID, userID, update)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
-			return e.withContext(err, " A user with specified id was not found", ErrStatusNotFound)
+			return e.withContext(err, "Unknown tenant or user id", ErrStatusNotFound)
 		}
 		return e.withContext(err, "An internal server error ocurred. Please try again later", ErrStatusInternal)
 	}

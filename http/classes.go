@@ -51,7 +51,7 @@ func (c *ClassHandler) CreateClass(w http.ResponseWriter, r *http.Request) *appE
 	class, err = c.store.CreateClass(r.Context(), tenantID, class)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
-			return e.withContext(err, "A tenant with specified id was not found", ErrStatusNotFound)
+			return e.withContext(err, "Unknown tenant id", ErrStatusNotFound)
 		}
 		return e.withContext(err, "An internal server error ocurred. Please try again later", ErrStatusInternal)
 	}
@@ -85,8 +85,7 @@ func (c *ClassHandler) GetClassByID(w http.ResponseWriter, r *http.Request) *app
 	fmt.Println("GET USER BY ID", class)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
-			msg := fmt.Sprintf("Class with id %d was not found", classID)
-			return e.withContext(err, msg, ErrStatusNotFound)
+			return e.withContext(err, "Unknown tenant or class id", ErrStatusNotFound)
 		}
 		return e.withContext(err, "An internal server error ocurred. Please try again later", ErrStatusInternal)
 	}

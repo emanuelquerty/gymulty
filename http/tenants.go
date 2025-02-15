@@ -63,7 +63,7 @@ func (t *TenantHandler) createTenant(w http.ResponseWriter, r *http.Request) *ap
 	newUser, err := t.store.CreateUser(r.Context(), newTenant.ID, userBody)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
-			return e.withContext(err, "A tenant with specified id was not found", ErrStatusNotFound)
+			return e.withContext(err, "Unknown tenant id", ErrStatusNotFound)
 		}
 		return e.withContext(err, "An internal server error ocurred. Please try again later", ErrStatusInternal)
 	}
