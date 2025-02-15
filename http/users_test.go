@@ -15,7 +15,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestGetUser(t *testing.T) {
+func TestGetUserByID(t *testing.T) {
 	user := domain.User{
 		ID:        1,
 		TenantID:  1,
@@ -199,7 +199,7 @@ func TestCreateUser(t *testing.T) {
 	})
 }
 
-func TestUpdateUser(t *testing.T) {
+func TestUpdateUserByID(t *testing.T) {
 	user := domain.User{
 		ID:        3,
 		TenantID:  1,
@@ -278,7 +278,7 @@ func TestUpdateUser(t *testing.T) {
 
 }
 
-func TestDelete(t *testing.T) {
+func TestDeleteUserByID(t *testing.T) {
 	t.Run("returns 204 on success", func(t *testing.T) {
 		req := httptest.NewRequest("DELETE", "/api/tenants/1/users/2", nil)
 		store := new(mock.Store)
@@ -289,19 +289,6 @@ func TestDelete(t *testing.T) {
 		res := newUserRequest(store, req)
 		got := res.Code
 		want := 204
-		assert.Equal(t, want, got, "status codes should be equal")
-	})
-
-	t.Run("returns 404 for non-existing id", func(t *testing.T) {
-		req := httptest.NewRequest("DELETE", "/api/tenants/1/users/5", nil)
-		store := new(mock.Store)
-		store.DeleteByIDFn = func(ctx context.Context, tenantID int, userID int) error {
-			return sql.ErrNoRows
-		}
-
-		res := newUserRequest(store, req)
-		got := res.Code
-		want := 404
 		assert.Equal(t, want, got, "status codes should be equal")
 	})
 

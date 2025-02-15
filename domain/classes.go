@@ -21,4 +21,5 @@ type Class struct {
 type ClassStore interface {
 	CreateClass(ctx context.Context, tenantID int, class Class) (Class, error)
 	GetClassByID(ctx context.Context, tenantID int, classID int) (Class, error)
+	DeleteClassByID(ctx context.Context, tenantID int, classID int) error
 }

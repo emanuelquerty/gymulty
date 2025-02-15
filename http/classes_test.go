@@ -59,6 +59,18 @@ func TestCreateClass(t *testing.T) {
 		assert.Equal(t, want, got, "classes should match")
 	})
 
+	t.Run("creates a new user, returning 201 status code", func(t *testing.T) {
+		body, _ := json.Marshal(class)
+		buf := bytes.NewBuffer(body)
+		req := httptest.NewRequest("POST", "/api/tenants/6/classes", buf)
+
+		res := NewClassRequest(req, store)
+		want := 201
+		got := res.Code
+
+		assert.Equal(t, want, got, "status codes should match")
+	})
+
 	t.Run("returns 400 status code on invalid tenant id", func(t *testing.T) {
 
 		body, _ := json.Marshal(class)
@@ -132,13 +144,13 @@ func TestGetClassByID(t *testing.T) {
 		req := httptest.NewRequest("GET", "/api/tenants/INvalid6283id/classes/1", nil)
 		res := NewClassRequest(req, store)
 		got := res.Code
-		assert.Equal(t, want, got, "status code should match should match")
+		assert.Equal(t, want, got, "status code should match")
 
 		//Invalid class id
 		req = httptest.NewRequest("GET", "/api/tenants/6/classes/invalid_classID1", nil)
 		res = NewClassRequest(req, store)
 		got = res.Code
-		assert.Equal(t, want, got, "status code should match should match")
+		assert.Equal(t, want, got, "status code should match")
 	})
 
 	t.Run("returns 404 on non-existing tenant/class id", func(t *testing.T) {
@@ -153,13 +165,54 @@ func TestGetClassByID(t *testing.T) {
 		req := httptest.NewRequest("GET", "/api/tenants/637/classes/1", nil)
 		res := NewClassRequest(req, store)
 		got := res.Code
-		assert.Equal(t, want, got, "status code should match should match")
+		assert.Equal(t, want, got, "status code should match")
 
 		// Non-existing class id
 		req = httptest.NewRequest("GET", "/api/tenants/6/classes/981", nil)
 		res = NewClassRequest(req, store)
 		got = res.Code
-		assert.Equal(t, want, got, "status code should match should match")
+		assert.Equal(t, want, got, "status code should match")
+	})
+}
+
+func TestDeleteClassByID(t *testing.T) {
+	t.Run("delete class with id 3, returning 204 on success", func(t *testing.T) {
+		store := new(mock.ClassStore)
+		store.DeleteClassByIDFn = func(ctx context.Context, tenantID, classID int) error {
+			return nil
+		}
+		want := 204
+
+		req := httptest.NewRequest("DELETE", "/api/tenants/6/classes/1", nil)
+		res := NewClassRequest(req, store)
+		got := res.Code
+		assert.Equal(t, want, got, "status code should match")
+	})
+
+	t.Run("delete class with invalid class id, returning 400 status code", func(t *testing.T) {
+		store := new(mock.ClassStore)
+		store.DeleteClassByIDFn = func(ctx context.Context, tenantID, classID int) error {
+			return nil
+		}
+		want := 400
+
+		req := httptest.NewRequest("DELETE", "/api/tenants/6/classes/INValidID10293", nil)
+		res := NewClassRequest(req, store)
+		got := res.Code
+		assert.Equal(t, want, got, "status code should match")
+	})
+
+	t.Run("delete class with invalid tenant id, returning 400 status code", func(t *testing.T) {
+		store := new(mock.ClassStore)
+		store.DeleteClassByIDFn = func(ctx context.Context, tenantID, classID int) error {
+			return nil
+		}
+		want := 400
+
+		req := httptest.NewRequest("DELETE", "/api/tenants/NotValidID123/classes/1", nil)
+		res := NewClassRequest(req, store)
+		got := res.Code
+		assert.Equal(t, want, got, "status code should match")
 	})
 }
 

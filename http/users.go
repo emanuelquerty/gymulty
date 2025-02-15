@@ -165,9 +165,6 @@ func (u *UserHandler) deleteUserByID(w http.ResponseWriter, r *http.Request) *ap
 
 	err = u.store.DeleteUserByID(r.Context(), tenantID, userID)
 	if err != nil {
-		if errors.Is(err, sql.ErrNoRows) {
-			return e.withContext(err, " A user with specified id was not found", ErrNotFound)
-		}
 		return e.withContext(err, "An internal server error ocurred. Please try again later", ErrInternal)
 	}
 

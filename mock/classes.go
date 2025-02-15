@@ -9,8 +9,9 @@ import (
 var _ domain.ClassStore = (*ClassStore)(nil)
 
 type ClassStore struct {
-	CreateClassFn  func(ctx context.Context, tenantID int, class domain.Class) (domain.Class, error)
-	GetClassByIDFn func(ctx context.Context, tenantID int, classID int) (domain.Class, error)
+	CreateClassFn     func(ctx context.Context, tenantID int, class domain.Class) (domain.Class, error)
+	GetClassByIDFn    func(ctx context.Context, tenantID int, classID int) (domain.Class, error)
+	DeleteClassByIDFn func(ctx context.Context, tenantID int, classID int) error
 }
 
 func (c *ClassStore) CreateClass(ctx context.Context, tenantID int, class domain.Class) (domain.Class, error) {
@@ -19,4 +20,8 @@ func (c *ClassStore) CreateClass(ctx context.Context, tenantID int, class domain
 
 func (c *ClassStore) GetClassByID(ctx context.Context, tenantID int, classID int) (domain.Class, error) {
 	return c.GetClassByIDFn(ctx, tenantID, classID)
+}
+
+func (c *ClassStore) DeleteClassByID(ctx context.Context, tenantID int, classID int) error {
+	return c.DeleteClassByIDFn(ctx, tenantID, classID)
 }
