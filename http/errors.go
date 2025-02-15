@@ -40,11 +40,15 @@ func (e *appError) withContext(err error, msg string, statusText string) *appErr
 	return e
 }
 
+func (e *appError) String() string {
+	return e.Error.Error()
+}
+
 type errorHandler func(w http.ResponseWriter, r *http.Request) *appError
 
 func (fn errorHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	if e := fn(w, r); e != nil { // e is *appError, not error
-		e.Logger.Error(e.Error.Error())
+		e.Logger.Error(e.String())
 		e.Error = nil // e.Error may come from db, etc. So we hide this from the user
 		w.WriteHeader(statusCode[e.Code])
 		json.NewEncoder(w).Encode(e)
