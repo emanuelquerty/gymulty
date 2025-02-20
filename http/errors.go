@@ -7,23 +7,23 @@ import (
 )
 
 const (
-	ErrInternal       = "INTERNAL_SERVER_ERROR"
-	ErrUnauthorized   = "UNAUTHORIZED"
-	ErrNotFound       = "NOT_FOUND"
-	ErrBadRequest     = "MALFORMED_REQUEST"
-	ErrForbidden      = "PERMISSION_DENIED"
-	ErrConflict       = "CONFLICT"
-	ErrNotImplemented = "NOT_IMPLEMENTED"
+	ErrStatusInternal       = "internal_server_error"
+	ErrStatusUnauthorized   = "unauthorized"
+	ErrStatusNotFound       = "not_found"
+	ErrStatusBadRequest     = "malformed_request"
+	ErrStatusForbidden      = "permission_denied"
+	ErrStatusConflict       = "conflict"
+	ErrStatusNotImplemented = "not_implemented"
 )
 
 var statusCode = map[string]int{
-	ErrInternal:       http.StatusInternalServerError,
-	ErrUnauthorized:   http.StatusUnauthorized,
-	ErrNotFound:       http.StatusNotFound,
-	ErrBadRequest:     http.StatusBadRequest,
-	ErrForbidden:      http.StatusForbidden,
-	ErrConflict:       http.StatusConflict,
-	ErrNotImplemented: http.StatusNotImplemented,
+	ErrStatusInternal:       http.StatusInternalServerError,
+	ErrStatusUnauthorized:   http.StatusUnauthorized,
+	ErrStatusNotFound:       http.StatusNotFound,
+	ErrStatusBadRequest:     http.StatusBadRequest,
+	ErrStatusForbidden:      http.StatusForbidden,
+	ErrStatusConflict:       http.StatusConflict,
+	ErrStatusNotImplemented: http.StatusNotImplemented,
 }
 
 type appError struct {
@@ -40,11 +40,15 @@ func (e *appError) withContext(err error, msg string, statusText string) *appErr
 	return e
 }
 
+func (e *appError) String() string {
+	return e.Error.Error()
+}
+
 type errorHandler func(w http.ResponseWriter, r *http.Request) *appError
 
 func (fn errorHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	if e := fn(w, r); e != nil { // e is *appError, not error
-		e.Logger.Error(e.Error.Error())
+		e.Logger.Error(e.String())
 		e.Error = nil // e.Error may come from db, etc. So we hide this from the user
 		w.WriteHeader(statusCode[e.Code])
 		json.NewEncoder(w).Encode(e)

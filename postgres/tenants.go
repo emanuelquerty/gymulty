@@ -5,28 +5,15 @@ import (
 
 	"github.com/emanuelquerty/gymulty/domain"
 	"github.com/jackc/pgx/v5"
-	"github.com/jackc/pgx/v5/pgxpool"
 )
 
-var _ domain.TenantStore = (*TenantStore)(nil)
-
-type TenantStore struct {
-	pool *pgxpool.Pool
-}
-
-func NewTenantStore(pool *pgxpool.Pool) *TenantStore {
-	return &TenantStore{
-		pool: pool,
-	}
-}
-
-func (t *TenantStore) CreateTenant(ctx context.Context, data domain.Tenant) (domain.Tenant, error) {
+func (s *Store) CreateTenant(ctx context.Context, data domain.Tenant) (domain.Tenant, error) {
 	query :=
 		`INSERT INTO tenants (business_name, subdomain) 
 		VALUES ($1, $2) 
 		RETURNING id, status, created_at, updated_at`
 
-	tx, err := t.pool.BeginTx(ctx, pgx.TxOptions{})
+	tx, err := s.pool.BeginTx(ctx, pgx.TxOptions{})
 	if err != nil {
 		return domain.Tenant{}, err
 	}

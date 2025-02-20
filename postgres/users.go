@@ -5,28 +5,15 @@ import (
 
 	"github.com/emanuelquerty/gymulty/domain"
 	"github.com/jackc/pgx/v5"
-	"github.com/jackc/pgx/v5/pgxpool"
 )
 
-var _ domain.UserStore = (*UserStore)(nil)
-
-type UserStore struct {
-	pool *pgxpool.Pool
-}
-
-func NewUserStore(pool *pgxpool.Pool) *UserStore {
-	return &UserStore{
-		pool: pool,
-	}
-}
-
-func (u *UserStore) CreateUser(ctx context.Context, tenantID int, data domain.User) (domain.User, error) {
+func (s *Store) CreateUser(ctx context.Context, tenantID int, data domain.User) (domain.User, error) {
 	query :=
 		`INSERT INTO users (tenant_id, first_name, last_name, email, password, role) 
 		VALUES ($1, $2, $3, $4, $5, $6) 
 		RETURNING id, created_at, updated_at`
 
-	tx, err := u.pool.BeginTx(ctx, pgx.TxOptions{})
+	tx, err := s.pool.BeginTx(ctx, pgx.TxOptions{})
 	if err != nil {
 		return domain.User{}, err
 	}
@@ -47,9 +34,9 @@ func (u *UserStore) CreateUser(ctx context.Context, tenantID int, data domain.Us
 	return user, nil
 }
 
-func (u *UserStore) GetUserByID(ctx context.Context, tenantID int, userID int) (domain.User, error) {
+func (s *Store) GetUserByID(ctx context.Context, tenantID int, userID int) (domain.User, error) {
 	query := "SELECT * FROM users WHERE tenant_id=$1 AND id=$2"
-	tx, err := u.pool.BeginTx(ctx, pgx.TxOptions{})
+	tx, err := s.pool.BeginTx(ctx, pgx.TxOptions{})
 	if err != nil {
 		return domain.User{}, err
 	}
@@ -72,16 +59,16 @@ func (u *UserStore) GetUserByID(ctx context.Context, tenantID int, userID int) (
 	return user, nil
 }
 
-func (u *UserStore) UpdateUser(ctx context.Context, tenantID int, userID int, updates domain.UserUpdate) (domain.User, error) {
+func (s *Store) UpdateUser(ctx context.Context, tenantID int, userID int, updates domain.UserUpdate) (domain.User, error) {
 	query, columnValues := buildUserUpdateQuery(tenantID, userID, updates)
 
-	tx, err := u.pool.BeginTx(ctx, pgx.TxOptions{})
+	tx, err := s.pool.BeginTx(ctx, pgx.TxOptions{})
 	if err != nil {
 		return domain.User{}, err
 	}
 	defer tx.Rollback(ctx)
 
-	rows, err := u.pool.Query(ctx, query, columnValues...)
+	rows, err := s.pool.Query(ctx, query, columnValues...)
 	if err != nil {
 		return domain.User{}, err
 	}
@@ -94,9 +81,9 @@ func (u *UserStore) UpdateUser(ctx context.Context, tenantID int, userID int, up
 
 }
 
-func (u *UserStore) DeleteUserByID(ctx context.Context, tenantID int, userID int) error {
+func (s *Store) DeleteUserByID(ctx context.Context, tenantID int, userID int) error {
 	query := `DELETE FROM users WHERE tenant_id=$1 AND id=$2`
-	tx, err := u.pool.BeginTx(ctx, pgx.TxOptions{})
+	tx, err := s.pool.BeginTx(ctx, pgx.TxOptions{})
 	if err != nil {
 		return err
 	}
@@ -111,9 +98,9 @@ func (u *UserStore) DeleteUserByID(ctx context.Context, tenantID int, userID int
 	return tx.Commit(ctx)
 }
 
-func (u *UserStore) GetAllUsers(ctx context.Context, tenantID int) ([]domain.User, error) {
+func (s *Store) GetAllUsers(ctx context.Context, tenantID int) ([]domain.User, error) {
 	query := "SELECT * FROM users WHERE tenant_id=$1"
-	tx, err := u.pool.BeginTx(ctx, pgx.TxOptions{})
+	tx, err := s.pool.BeginTx(ctx, pgx.TxOptions{})
 	if err != nil {
 		return []domain.User{}, err
 	}
