@@ -28,20 +28,19 @@ func TestCreateTenant(t *testing.T) {
 	buf := bytes.NewBuffer(jsonBody)
 
 	t.Run("returns newly created tenant on success", func(t *testing.T) {
-		userStore := new(mock.UserStore)
-		userStore.CreateUserFn = func(ctx context.Context, tenantID int, data domain.User) (domain.User, error) {
+		store := new(mock.Store)
+		store.CreateTenantFn = func(ctx context.Context, data domain.Tenant) (domain.Tenant, error) {
 			data.ID = 1
 			return data, nil
 		}
 
-		tenantStore := new(mock.TenantStore)
-		tenantStore.CreateTenantFn = func(ctx context.Context, data domain.Tenant) (domain.Tenant, error) {
+		store.CreateUserFn = func(ctx context.Context, tenantID int, data domain.User) (domain.User, error) {
 			data.ID = 1
 			return data, nil
 		}
 
 		req := httptest.NewRequest("POST", "/api/tenants/signup", buf)
-		res := newTenantRequest(tenantStore, userStore, req)
+		res := newTenantRequest(store, req)
 
 		want := Response[TenantSignupResponse]{
 			Count: 1,
@@ -68,8 +67,8 @@ func TestCreateTenant(t *testing.T) {
 	})
 }
 
-func newTenantRequest(tenantStore *mock.TenantStore, userstore *mock.UserStore, req *http.Request) *httptest.ResponseRecorder {
-	handler := NewTenantHandler(slog.Default(), tenantStore, userstore)
+func newTenantRequest(store *mock.Store, req *http.Request) *httptest.ResponseRecorder {
+	handler := NewTenantHandler(slog.Default(), store)
 	res := httptest.NewRecorder()
 	handler.ServeHTTP(res, req)
 	return res
