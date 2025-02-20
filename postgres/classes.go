@@ -76,3 +76,29 @@ func (s *Store) DeleteClassByID(ctx context.Context, tenantID int, classID int) 
 	rows.Close()
 	return tx.Commit(ctx)
 }
+
+func (s *Store) GetAllClasses(ctx context.Context, tenantID int) ([]domain.Class, error) {
+	query := "SELECT * FROM classes WHERE tenant_id=$1"
+
+	tx, err := s.pool.BeginTx(ctx, pgx.TxOptions{})
+	if err != nil {
+		return []domain.Class{}, err
+	}
+	defer tx.Rollback(ctx)
+
+	rows, err := tx.Query(ctx, query, tenantID)
+	if err != nil {
+		return []domain.Class{}, err
+	}
+
+	classes, err := pgx.CollectRows(rows, pgx.RowToStructByName[domain.Class])
+	if err != nil {
+		return []domain.Class{}, err
+	}
+	err = tx.Commit(ctx)
+	if err != nil {
+		return []domain.Class{}, err
+	}
+
+	return classes, nil
+}

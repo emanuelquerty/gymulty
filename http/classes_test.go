@@ -216,6 +216,81 @@ func TestDeleteClassByID(t *testing.T) {
 	})
 }
 
+func TestGetAllClasses(t *testing.T) {
+	classes := []domain.Class{
+		{
+			ID:          1,
+			TenantID:    3,
+			TrainerID:   5,
+			Name:        "Yoga Session",
+			Description: "An amazing class that will bring you to a complete state of relaxation",
+			Capacity:    18,
+			StartsAt:    time.Now().AddDate(0, 0, 18),
+			EndsAt:      time.Now().AddDate(0, 0, 18).Add(1 * time.Hour),
+		},
+	}
+	t.Run("returns all classes given tenant id", func(t *testing.T) {
+		store := new(mock.ClassStore)
+		store.GetAllClassesFn = func(ctx context.Context, tenantID int) ([]domain.Class, error) {
+			return classes, nil
+		}
+
+		req := httptest.NewRequest("GET", "/api/tenants/3/classes", nil)
+		res := NewClassRequest(req, store)
+
+		want := Response[[]domain.Class]{
+			Count: 1,
+			Data:  classes,
+		}
+		var got Response[[]domain.Class]
+		json.NewDecoder(res.Body).Decode(&got)
+		assert.Equal(t, want, got, "responses should match")
+	})
+
+	t.Run("returns count zero (0) in response for tenant with no classes", func(t *testing.T) {
+		store := new(mock.ClassStore)
+		store.GetAllClassesFn = func(ctx context.Context, tenantID int) ([]domain.Class, error) {
+			return []domain.Class{}, nil
+		}
+
+		req := httptest.NewRequest("GET", "/api/tenants/3/classes", nil)
+		res := NewClassRequest(req, store)
+
+		want := Response[[]domain.Class]{Data: []domain.Class{}}
+		var got Response[[]domain.Class]
+		json.NewDecoder(res.Body).Decode(&got)
+		assert.Equal(t, want, got, "responses should match")
+	})
+
+	t.Run("returns 400 status code on invalid tenantID", func(t *testing.T) {
+		store := new(mock.ClassStore)
+		store.GetAllClassesFn = func(ctx context.Context, tenantID int) ([]domain.Class, error) {
+			return classes, nil
+		}
+
+		req := httptest.NewRequest("GET", "/api/tenants/INvalid1293id/classes", nil)
+		res := NewClassRequest(req, store)
+
+		want := 400
+		got := res.Code
+		assert.Equal(t, want, got, "status codes should match")
+	})
+
+	t.Run("returns 200 status code on success", func(t *testing.T) {
+		store := new(mock.ClassStore)
+		store.GetAllClassesFn = func(ctx context.Context, tenantID int) ([]domain.Class, error) {
+			return classes, nil
+		}
+
+		req := httptest.NewRequest("GET", "/api/tenants/3/classes", nil)
+		res := NewClassRequest(req, store)
+
+		want := 200
+		got := res.Code
+		assert.Equal(t, want, got, "status codes should match")
+	})
+}
+
 func NewClassRequest(req *http.Request, store domain.ClassStore) *httptest.ResponseRecorder {
 	res := httptest.NewRecorder()
 	handler := NewClassHandler(slog.Default(), store)

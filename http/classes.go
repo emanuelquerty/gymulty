@@ -35,6 +35,7 @@ func (c *ClassHandler) registerRoutes(router *http.ServeMux) {
 	router.Handle("POST /api/tenants/{tenantID}/classes", errorHandler(c.CreateClass))
 	router.Handle("GET /api/tenants/{tenantID}/classes/{classID}", errorHandler(c.GetClassByID))
 	router.Handle("DELETE /api/tenants/{tenantID}/classes/{classID}", errorHandler(c.DeleteClassByID))
+	router.Handle("GET /api/tenants/{tenantID}/classes", errorHandler(c.GetAllClasses))
 }
 
 func (c *ClassHandler) CreateClass(w http.ResponseWriter, r *http.Request) *appError {
@@ -118,5 +119,26 @@ func (c *ClassHandler) DeleteClassByID(w http.ResponseWriter, r *http.Request) *
 	}
 
 	w.WriteHeader(http.StatusNoContent)
+	return nil
+}
+
+func (c *ClassHandler) GetAllClasses(w http.ResponseWriter, r *http.Request) *appError {
+	e := appError{Logger: c.logger}
+
+	tenantID, err := strconv.Atoi(r.PathValue("tenantID"))
+	if err != nil {
+		return e.withContext(err, "Invalid tenant id", ErrStatusBadRequest)
+	}
+
+	classes, err := c.store.GetAllClasses(r.Context(), tenantID)
+	if err != nil {
+		return e.withContext(err, "An internal server error ocurred. Please try again later", ErrStatusInternal)
+	}
+	res := Response[[]domain.Class]{
+		Count: len(classes),
+		Data:  classes,
+	}
+	w.WriteHeader(http.StatusOK)
+	json.NewEncoder(w).Encode(res)
 	return nil
 }
