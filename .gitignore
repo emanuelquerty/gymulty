@@ -1,2 +1,3 @@
 ./cmd/http/tmp
+./tmp
 .env
