@@ -25,8 +25,8 @@ func TestCreateClass(t *testing.T) {
 		Name:        "Yoga Session",
 		Description: "An amazing class that will bring you to a complete state of relaxation",
 		Capacity:    18,
-		StartsAt:    time.Now().AddDate(0, 0, 18),
-		EndsAt:      time.Now().AddDate(0, 0, 18).Add(1 * time.Hour),
+		StartsAt:    time.Now().AddDate(0, 0, 18).UTC(),
+		EndsAt:      time.Now().AddDate(0, 0, 18).Add(1 * time.Hour).UTC(),
 	}
 
 	store := new(mock.ClassStore)
@@ -114,8 +114,8 @@ func TestGetClassByID(t *testing.T) {
 		Name:        "Yoga Session",
 		Description: "An amazing class that will bring you to a complete state of relaxation",
 		Capacity:    18,
-		StartsAt:    time.Now().AddDate(0, 0, 18),
-		EndsAt:      time.Now().AddDate(0, 0, 18).Add(1 * time.Hour),
+		StartsAt:    time.Now().AddDate(0, 0, 18).UTC(),
+		EndsAt:      time.Now().AddDate(0, 0, 18).Add(1 * time.Hour).UTC(),
 	}
 	t.Run("returns class with id 1", func(t *testing.T) {
 		store := new(mock.ClassStore)
@@ -225,8 +225,8 @@ func TestGetAllClasses(t *testing.T) {
 			Name:        "Yoga Session",
 			Description: "An amazing class that will bring you to a complete state of relaxation",
 			Capacity:    18,
-			StartsAt:    time.Now().AddDate(0, 0, 18),
-			EndsAt:      time.Now().AddDate(0, 0, 18).Add(1 * time.Hour),
+			StartsAt:    time.Now().AddDate(0, 0, 18).UTC(),
+			EndsAt:      time.Now().AddDate(0, 0, 18).Add(1 * time.Hour).UTC(),
 		},
 	}
 	t.Run("returns all classes given tenant id", func(t *testing.T) {
