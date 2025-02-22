@@ -4,6 +4,8 @@ import (
 	"encoding/json"
 	"log/slog"
 	"net/http"
+
+	"github.com/emanuelquerty/gymulty/http/middleware"
 )
 
 const (
@@ -48,7 +50,8 @@ type errorHandler func(w http.ResponseWriter, r *http.Request) *appError
 
 func (fn errorHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	if e := fn(w, r); e != nil { // e is *appError, not error
-		e.Logger.Error(e.String())
+		reqID := middleware.GetRequestID(r.Context(), e.Logger)
+		e.Logger.Error(e.Message, slog.String("request_id", reqID), slog.String("error", e.String()))
 		e.Error = nil // e.Error may come from db, etc. So we hide this from the user
 		w.WriteHeader(statusCode[e.Code])
 		json.NewEncoder(w).Encode(e)
