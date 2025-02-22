@@ -1,9 +1,7 @@
 package http
 
 import (
-	"database/sql"
 	"encoding/json"
-	"errors"
 	"fmt"
 	"log/slog"
 	"net/http"
@@ -43,7 +41,7 @@ func (c *ClassHandler) CreateClass(w http.ResponseWriter, r *http.Request) *appE
 
 	tenantID, err := strconv.Atoi(r.PathValue("tenantID"))
 	if err != nil {
-		return e.withContext(err, "Invalid tenant id", ErrStatusBadRequest)
+		return e.withContext(err, ErrMsgInvalidResourceID, ErrStatusBadRequest)
 	}
 
 	var class domain.Class
@@ -51,10 +49,7 @@ func (c *ClassHandler) CreateClass(w http.ResponseWriter, r *http.Request) *appE
 
 	class, err = c.store.CreateClass(r.Context(), tenantID, class)
 	if err != nil {
-		if errors.Is(err, sql.ErrNoRows) {
-			return e.withContext(err, "Unknown tenant id", ErrStatusNotFound)
-		}
-		return e.withContext(err, "An internal server error ocurred. Please try again later", ErrStatusInternal)
+		return e.withContext(err, ErrMsgInternal, ErrStatusInternal)
 	}
 
 	resourceURI := fmt.Sprintf("%s://%s%s/%d", r.URL.Scheme, r.Host, r.URL.String(), class.ID)
@@ -64,7 +59,7 @@ func (c *ClassHandler) CreateClass(w http.ResponseWriter, r *http.Request) *appE
 	res := Response[[]domain.Class]{Count: 1, Data: []domain.Class{class}}
 	err = json.NewEncoder(w).Encode(res)
 	if err != nil {
-		return e.withContext(err, "An internal server error ocurred. Please try again later", ErrStatusInternal)
+		return e.withContext(err, ErrMsgInternal, ErrStatusInternal)
 	}
 	return nil
 }
@@ -74,28 +69,24 @@ func (c *ClassHandler) GetClassByID(w http.ResponseWriter, r *http.Request) *app
 
 	tenantID, err := strconv.Atoi(r.PathValue("tenantID"))
 	if err != nil {
-		return e.withContext(err, "Invalid tenant id", ErrStatusBadRequest)
+		return e.withContext(err, ErrMsgInvalidResourceID, ErrStatusBadRequest)
 	}
 
 	classID, err := strconv.Atoi(r.PathValue("classID"))
 	if err != nil {
-		return e.withContext(err, "Invalid class id", ErrStatusBadRequest)
+		return e.withContext(err, ErrMsgInvalidResourceID, ErrStatusBadRequest)
 	}
 
 	class, err := c.store.GetClassByID(r.Context(), tenantID, classID)
-	fmt.Println("GET USER BY ID", class)
 	if err != nil {
-		if errors.Is(err, sql.ErrNoRows) {
-			return e.withContext(err, "Unknown tenant or class id", ErrStatusNotFound)
-		}
-		return e.withContext(err, "An internal server error ocurred. Please try again later", ErrStatusInternal)
+		return e.withContext(err, ErrMsgInternal, ErrStatusInternal)
 	}
 
 	w.WriteHeader(http.StatusOK)
 	res := Response[[]domain.Class]{Count: 1, Data: []domain.Class{class}}
 	err = json.NewEncoder(w).Encode(res)
 	if err != nil {
-		return e.withContext(err, "An internal server error ocurred. Please try again later", ErrStatusInternal)
+		return e.withContext(err, ErrMsgInternal, ErrStatusInternal)
 	}
 	return nil
 }
@@ -105,17 +96,17 @@ func (c *ClassHandler) DeleteClassByID(w http.ResponseWriter, r *http.Request) *
 
 	tenantID, err := strconv.Atoi(r.PathValue("tenantID"))
 	if err != nil {
-		return e.withContext(err, "Invalid tenant id", ErrStatusBadRequest)
+		return e.withContext(err, ErrMsgInvalidResourceID, ErrStatusBadRequest)
 	}
 
 	classID, err := strconv.Atoi(r.PathValue("classID"))
 	if err != nil {
-		return e.withContext(err, "Invalid class id", ErrStatusBadRequest)
+		return e.withContext(err, ErrMsgInvalidResourceID, ErrStatusBadRequest)
 	}
 
 	err = c.store.DeleteClassByID(r.Context(), tenantID, classID)
 	if err != nil {
-		return e.withContext(err, "An internal server error ocurred. Please try again later", ErrStatusInternal)
+		return e.withContext(err, ErrMsgInternal, ErrStatusInternal)
 	}
 
 	w.WriteHeader(http.StatusNoContent)
@@ -127,12 +118,12 @@ func (c *ClassHandler) GetAllClasses(w http.ResponseWriter, r *http.Request) *ap
 
 	tenantID, err := strconv.Atoi(r.PathValue("tenantID"))
 	if err != nil {
-		return e.withContext(err, "Invalid tenant id", ErrStatusBadRequest)
+		return e.withContext(err, ErrMsgInvalidResourceID, ErrStatusBadRequest)
 	}
 
 	classes, err := c.store.GetAllClasses(r.Context(), tenantID)
 	if err != nil {
-		return e.withContext(err, "An internal server error ocurred. Please try again later", ErrStatusInternal)
+		return e.withContext(err, ErrMsgInternal, ErrStatusInternal)
 	}
 	res := Response[[]domain.Class]{
 		Count: len(classes),
