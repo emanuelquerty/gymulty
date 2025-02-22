@@ -1,9 +1,7 @@
 package http
 
 import (
-	"database/sql"
 	"encoding/json"
-	"errors"
 	"fmt"
 	"log/slog"
 	"net/http"
@@ -51,9 +49,6 @@ func (c *ClassHandler) CreateClass(w http.ResponseWriter, r *http.Request) *appE
 
 	class, err = c.store.CreateClass(r.Context(), tenantID, class)
 	if err != nil {
-		if errors.Is(err, sql.ErrNoRows) {
-			return e.withContext(err, "Unknown tenant id", ErrStatusNotFound)
-		}
 		return e.withContext(err, ErrMsgInternal, ErrStatusInternal)
 	}
 
@@ -83,11 +78,7 @@ func (c *ClassHandler) GetClassByID(w http.ResponseWriter, r *http.Request) *app
 	}
 
 	class, err := c.store.GetClassByID(r.Context(), tenantID, classID)
-	fmt.Println("GET USER BY ID", class)
 	if err != nil {
-		if errors.Is(err, sql.ErrNoRows) {
-			return e.withContext(err, "Unknown tenant or class id", ErrStatusNotFound)
-		}
 		return e.withContext(err, ErrMsgInternal, ErrStatusInternal)
 	}
 

@@ -1,11 +1,14 @@
 package http
 
 import (
+	"database/sql"
 	"encoding/json"
+	"errors"
 	"log/slog"
 	"net/http"
 
 	"github.com/emanuelquerty/gymulty/http/middleware"
+	"github.com/jackc/pgx/v5/pgconn"
 )
 
 const (
@@ -54,7 +57,19 @@ func (e *appError) String() string {
 type errorHandler func(w http.ResponseWriter, r *http.Request) *appError
 
 func (fn errorHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	if e := fn(w, r); e != nil { // e is *appError, not error
+	if e := fn(w, r); e != nil {
+		err := e.Error
+
+		if errors.Is(err, sql.ErrNoRows) {
+			e.Message = "The resource does not exist."
+			e.Code = ErrStatusNotFound
+		}
+
+		if dbError, ok := err.(*pgconn.PgError); ok {
+			e.Message = dbError.Message
+			e.Code = ErrStatusConflict
+		}
+
 		reqID := middleware.GetRequestID(r.Context(), e.Logger)
 		e.Logger.Error(e.Message, slog.String("request_id", reqID), slog.String("error", e.String()))
 		e.Error = nil // e.Error may come from db, etc. So we hide this from the user

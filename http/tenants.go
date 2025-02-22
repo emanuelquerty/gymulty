@@ -1,9 +1,7 @@
 package http
 
 import (
-	"database/sql"
 	"encoding/json"
-	"errors"
 	"log/slog"
 	"net/http"
 
@@ -62,9 +60,6 @@ func (t *TenantHandler) createTenant(w http.ResponseWriter, r *http.Request) *ap
 
 	newUser, err := t.store.CreateUser(r.Context(), newTenant.ID, userBody)
 	if err != nil {
-		if errors.Is(err, sql.ErrNoRows) {
-			return e.withContext(err, "Unknown tenant id", ErrStatusNotFound)
-		}
 		return e.withContext(err, ErrMsgInternal, ErrStatusInternal)
 	}
 
