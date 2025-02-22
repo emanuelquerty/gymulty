@@ -44,7 +44,7 @@ func (t *TenantHandler) createTenant(w http.ResponseWriter, r *http.Request) *ap
 	newTenant, err := t.store.CreateTenant(r.Context(), tenant)
 	e := &appError{Logger: t.logger}
 	if err != nil {
-		return e.withContext(err, "An internal server error ocurred. Please try again later", ErrStatusInternal)
+		return e.withContext(err, ErrMsgInternal, ErrStatusInternal)
 	}
 
 	userBody := domain.User{
@@ -57,7 +57,7 @@ func (t *TenantHandler) createTenant(w http.ResponseWriter, r *http.Request) *ap
 	}
 	userBody.Password, err = HashPassword(userBody.Password)
 	if err != nil {
-		return e.withContext(err, "An internal server error ocurred. Please try again later", ErrStatusInternal)
+		return e.withContext(err, ErrMsgInternal, ErrStatusInternal)
 	}
 
 	newUser, err := t.store.CreateUser(r.Context(), newTenant.ID, userBody)
@@ -65,7 +65,7 @@ func (t *TenantHandler) createTenant(w http.ResponseWriter, r *http.Request) *ap
 		if errors.Is(err, sql.ErrNoRows) {
 			return e.withContext(err, "Unknown tenant id", ErrStatusNotFound)
 		}
-		return e.withContext(err, "An internal server error ocurred. Please try again later", ErrStatusInternal)
+		return e.withContext(err, ErrMsgInternal, ErrStatusInternal)
 	}
 
 	res := Response[TenantSignupResponse]{

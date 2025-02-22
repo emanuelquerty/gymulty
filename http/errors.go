@@ -9,6 +9,11 @@ import (
 )
 
 const (
+	ErrMsgInternal          = "An internal server error ocurred. Please try again later"
+	ErrMsgInvalidResourceID = "Invalid resource id"
+)
+
+const (
 	ErrStatusInternal       = "internal_server_error"
 	ErrStatusUnauthorized   = "unauthorized"
 	ErrStatusNotFound       = "not_found"
