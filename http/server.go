@@ -1,6 +1,7 @@
 package http
 
 import (
+	"fmt"
 	"log/slog"
 	"net/http"
 
@@ -53,11 +54,11 @@ func (s *Server) registerGlobalMiddlewares() http.Handler {
 	return handler
 }
 
-func (s *Server) ListenAndServe(port string) error {
+func (s *Server) ListenAndServe(port int) error {
 	server := &http.Server{
-		Addr:    ":" + port,
+		Addr:    fmt.Sprintf(":%d", port),
 		Handler: s.registerGlobalMiddlewares(),
 	}
-	s.logger.Info("server is running", slog.String("port", port))
+	s.logger.Info("server is running", slog.Int("port", port))
 	return server.ListenAndServe()
 }
