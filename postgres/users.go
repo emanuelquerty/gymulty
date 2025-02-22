@@ -68,12 +68,16 @@ func (s *Store) UpdateUser(ctx context.Context, tenantID int, userID int, update
 	}
 	defer tx.Rollback(ctx)
 
-	rows, err := s.pool.Query(ctx, query, columnValues...)
+	rows, err := tx.Query(ctx, query, columnValues...)
 	if err != nil {
 		return domain.User{}, err
 	}
 
 	updatedUser, err := pgx.CollectOneRow(rows, pgx.RowToStructByName[domain.User])
+	if err != nil {
+		return domain.User{}, err
+	}
+	err = tx.Commit(ctx)
 	if err != nil {
 		return domain.User{}, err
 	}
