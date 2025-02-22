@@ -48,6 +48,7 @@ func main() {
 	server := http.NewServer(dbpool, logger)
 
 	server.Use(middleware.Logger)
+	server.Use(middleware.SetHeader("Content-Type", "application/json"))
 	server.Use(middleware.AddRequestID)
 
 	err = server.ListenAndServe(8080)
