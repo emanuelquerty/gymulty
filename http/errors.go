@@ -14,6 +14,7 @@ import (
 const (
 	ErrMsgInternal          = "An internal server error ocurred. Please try again later"
 	ErrMsgInvalidResourceID = "Invalid resource id"
+	ErrMsgNotFound          = "The resource with specified id was not found"
 )
 
 const (
@@ -54,6 +55,23 @@ func (e *appError) withContext(err error, msg string, statusText string) *appErr
 	e.Error = err
 	e.Message = msg
 	e.Code = statusText
+
+	if errors.Is(err, sql.ErrNoRows) {
+		e.Message = ErrMsgNotFound
+		e.Code = ErrStatusNotFound
+	}
+
+	if dbError, ok := err.(*pgconn.PgError); ok {
+		if msg, exists := constraintErrors[dbError.ConstraintName]; exists {
+			e.Message = msg
+		}
+		switch dbError.Code {
+		case "23505":
+			e.Code = ErrStatusConflict
+		case "23514":
+			e.Code = ErrStatusBadRequest
+		}
+	}
 	return e
 }
 
@@ -65,31 +83,12 @@ type errorHandler func(w http.ResponseWriter, r *http.Request) *appError
 
 func (fn errorHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	if e := fn(w, r); e != nil {
-		err := e.Error
-
-		if errors.Is(err, sql.ErrNoRows) {
-			e.Message = "The resource does not exist."
-			e.Code = ErrStatusNotFound
-		}
-
-		if dbError, ok := err.(*pgconn.PgError); ok {
-			if msg, exists := constraintErrors[dbError.ConstraintName]; exists {
-				e.Message = msg
-			}
-
-			switch dbError.Code {
-			case "23505":
-				e.Code = ErrStatusConflict
-			case "23514":
-				e.Code = ErrStatusBadRequest
-			}
-		}
-
 		reqID := middleware.GetRequestID(r.Context(), e.Logger)
-
-		e.Logger.Error(e.Message, slog.String("request_id", reqID), slog.String("error", e.String()))
-
-		e.Error = nil // e.Error may come from db, etc. So we hide this from the user
+		e.Logger.Error(e.Message,
+			slog.String("request_id", reqID),
+			slog.String("error", e.String()),
+		)
+		e.Error = nil // e.Error is for logging only.
 		w.WriteHeader(statusCode[e.Code])
 		json.NewEncoder(w).Encode(e)
 	}
