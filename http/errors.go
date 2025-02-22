@@ -36,6 +36,13 @@ var statusCode = map[string]int{
 	ErrStatusNotImplemented: http.StatusNotImplemented,
 }
 
+var constraintErrors = map[string]string{
+	"tenants_subdomain_key": "Subdomain already exists",
+	"tenants_status_check":  "Invalid value for status",
+	"users_email_key":       "Email already exists",
+	"users_role_check":      "Invalid value for role",
+}
+
 type appError struct {
 	Error   error        `json:"error,omitempty"  bson:"error"`
 	Code    string       `json:"code,omitempty"  bson:"code"`
@@ -66,12 +73,22 @@ func (fn errorHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		}
 
 		if dbError, ok := err.(*pgconn.PgError); ok {
-			e.Message = dbError.Message
-			e.Code = ErrStatusConflict
+			if msg, exists := constraintErrors[dbError.ConstraintName]; exists {
+				e.Message = msg
+			}
+
+			switch dbError.Code {
+			case "23505":
+				e.Code = ErrStatusConflict
+			case "23514":
+				e.Code = ErrStatusBadRequest
+			}
 		}
 
 		reqID := middleware.GetRequestID(r.Context(), e.Logger)
+
 		e.Logger.Error(e.Message, slog.String("request_id", reqID), slog.String("error", e.String()))
+
 		e.Error = nil // e.Error may come from db, etc. So we hide this from the user
 		w.WriteHeader(statusCode[e.Code])
 		json.NewEncoder(w).Encode(e)
