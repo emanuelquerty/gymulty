@@ -2,12 +2,15 @@ package postgres
 
 import (
 	"context"
+	"database/sql"
+	"embed"
 	"fmt"
-	"log/slog"
 
+	"github.com/emanuelquerty/gymulty/config"
 	"github.com/emanuelquerty/gymulty/domain"
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
+	"github.com/pressly/goose/v3"
 )
 
 var _ domain.Store = (*Store)(nil)
@@ -20,13 +23,8 @@ func NewStore(pool *pgxpool.Pool) *Store {
 	return &Store{pool: pool}
 }
 
-func Connect(dbname string, dbusername string, dbpassword string) (*pgxpool.Pool, error) {
-	err := createDBIfNotExists(dbname, dbusername, dbpassword)
-	if err != nil {
-		return nil, err
-	}
-
-	dsn := fmt.Sprintf("postgres://%s:%s@localhost:5432/%s", dbusername, dbpassword, dbname)
+func Connect(conf config.DBconfig) (*pgxpool.Pool, error) {
+	dsn := fmt.Sprintf("postgres://%s:%s@localhost:5432/%s", conf.DBusername, conf.DBpassword, conf.DBname)
 	pool, err := pgxpool.New(context.Background(), dsn)
 	if err != nil {
 		return nil, err
@@ -34,9 +32,9 @@ func Connect(dbname string, dbusername string, dbpassword string) (*pgxpool.Pool
 	return pool, nil
 }
 
-func createDBIfNotExists(dbname string, dbusername string, dbpassword string) error {
+func CreateDBIfNotExists(conf config.DBconfig) error {
 	ctx := context.Background()
-	dsn := fmt.Sprintf("postgres://%s:%s@localhost:5432/postgres", dbusername, dbpassword)
+	dsn := fmt.Sprintf("postgres://%s:%s@localhost:5432/postgres", conf.DBusername, conf.DBpassword)
 	conn, err := pgx.Connect(ctx, dsn)
 	if err != nil {
 		return err
@@ -45,18 +43,36 @@ func createDBIfNotExists(dbname string, dbusername string, dbpassword string) er
 
 	var exists bool
 	query := "SELECT EXISTS (SELECT FROM pg_database WHERE datname=$1)"
-	err = conn.QueryRow(ctx, query, dbname).Scan(&exists)
+	err = conn.QueryRow(ctx, query, conf.DBname).Scan(&exists)
 	if err != nil {
 		return fmt.Errorf("error checking database existence: %w", err)
 	}
 
 	if !exists {
-		query := fmt.Sprintf("CREATE DATABASE %s", dbname)
+		query := fmt.Sprintf("CREATE DATABASE %s", conf.DBname)
 		if _, err := conn.Exec(ctx, query); err != nil {
 			return fmt.Errorf("error creating database: %w", err)
-		} else {
-			slog.Info("Database created successfully")
 		}
+	}
+	return nil
+}
+
+func RunMigrations(embedMigrations embed.FS, conf config.DBconfig) error {
+	dsn := fmt.Sprintf("postgres://%s:%s@localhost:5432/%s", conf.DBusername, conf.DBpassword, conf.DBname)
+	db, err := sql.Open("pgx", dsn)
+	if err != nil {
+		return fmt.Errorf("error opening database for migrations: %w", err)
+	}
+	defer db.Close()
+
+	goose.SetBaseFS(embedMigrations)
+
+	if err := goose.SetDialect("postgres"); err != nil {
+		return fmt.Errorf("error setting goose dialect: %w", err)
+	}
+
+	if err := goose.Up(db, "postgres/migrations"); err != nil {
+		return fmt.Errorf("error running up migration: %w", err)
 	}
 	return nil
 }
