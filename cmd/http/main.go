@@ -28,7 +28,6 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	logger.Info("Database created successfully!")
 	err = postgres.RunMigrations(gymulty.EmbedMigrations, *dbconfig)
 	if err != nil {
 		log.Fatal(err)
@@ -37,7 +36,6 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	logger.Info("Database connected successfully!")
 
 	server := http.NewServer(dbpool, logger)
 
