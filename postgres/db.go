@@ -23,18 +23,27 @@ func NewStore(pool *pgxpool.Pool) *Store {
 	return &Store{pool: pool}
 }
 
-func Connect(conf config.DBconfig) (*pgxpool.Pool, error) {
-	dsn := fmt.Sprintf("postgres://%s:%s@localhost:5432/%s", conf.DBusername, conf.DBpassword, conf.DBname)
-	pool, err := pgxpool.New(context.Background(), dsn)
+func Connect(conf config.Database) (*pgxpool.Pool, error) {
+	dsn := fmt.Sprintf("user=%s password=%s host=%s port=%s dbname=%s",
+		conf.User, conf.Password, conf.Host, conf.Port, conf.Name)
+
+	dbConfig, err := pgxpool.ParseConfig(dsn)
+	if err != nil {
+		return nil, err
+	}
+
+	pool, err := pgxpool.NewWithConfig(context.Background(), dbConfig)
 	if err != nil {
 		return nil, err
 	}
 	return pool, nil
 }
 
-func CreateDBIfNotExists(conf config.DBconfig) error {
+func CreateDBIfNotExists(conf config.Database) error {
 	ctx := context.Background()
-	dsn := fmt.Sprintf("postgres://%s:%s@localhost:5432/postgres", conf.DBusername, conf.DBpassword)
+	dsn := fmt.Sprintf("user=%s password=%s host=%s port=%s dbname=postgres",
+		conf.User, conf.Password, conf.Host, conf.Port)
+
 	conn, err := pgx.Connect(ctx, dsn)
 	if err != nil {
 		return err
@@ -43,13 +52,13 @@ func CreateDBIfNotExists(conf config.DBconfig) error {
 
 	var exists bool
 	query := "SELECT EXISTS (SELECT FROM pg_database WHERE datname=$1)"
-	err = conn.QueryRow(ctx, query, conf.DBname).Scan(&exists)
+	err = conn.QueryRow(ctx, query, conf.Name).Scan(&exists)
 	if err != nil {
 		return fmt.Errorf("error checking database existence: %w", err)
 	}
 
 	if !exists {
-		query := fmt.Sprintf("CREATE DATABASE %s", conf.DBname)
+		query := fmt.Sprintf("CREATE DATABASE %s", conf.Name)
 		if _, err := conn.Exec(ctx, query); err != nil {
 			return fmt.Errorf("error creating database: %w", err)
 		}
@@ -57,8 +66,10 @@ func CreateDBIfNotExists(conf config.DBconfig) error {
 	return nil
 }
 
-func RunMigrations(embedMigrations embed.FS, conf config.DBconfig) error {
-	dsn := fmt.Sprintf("postgres://%s:%s@localhost:5432/%s", conf.DBusername, conf.DBpassword, conf.DBname)
+func RunMigrations(embedMigrations embed.FS, conf config.Database) error {
+	dsn := fmt.Sprintf("user=%s password=%s host=%s port=%s dbname=%s",
+		conf.User, conf.Password, conf.Host, conf.Port, conf.Name)
+
 	db, err := sql.Open("pgx", dsn)
 	if err != nil {
 		return fmt.Errorf("error opening database for migrations: %w", err)

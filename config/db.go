@@ -6,17 +6,22 @@ import (
 	"os"
 )
 
-type DBconfig struct {
-	DBname     string
-	DBusername string
-	DBpassword string
+type Database struct {
+	Host     string
+	Port     string
+	Name     string
+	User     string
+	Password string
 }
 
-func LoadDB(logger *slog.Logger) *DBconfig {
-	conf := new(DBconfig)
-	conf.DBname = getEnv(logger, "DB_NAME")
-	conf.DBusername = getEnv(logger, "DB_USERNAME")
-	conf.DBpassword = getEnv(logger, "DB_PASSWORD")
+func LoadDB(logger *slog.Logger) *Database {
+	conf := new(Database)
+
+	conf.Host = getEnv(logger, "DB_HOST")
+	conf.Port = getEnv(logger, "DB_PORT")
+	conf.Name = getEnv(logger, "DB_NAME")
+	conf.User = getEnv(logger, "DB_USER")
+	conf.Password = getEnv(logger, "DB_PASSWORD")
 	return conf
 }
 
