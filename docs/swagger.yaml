@@ -1,6 +1,87 @@
+definitions:
+  domain.PublicUser:
+    properties:
+      created_at:
+        type: string
+      first_name:
+        type: string
+      id:
+        type: integer
+      last_name:
+        type: string
+      role:
+        type: string
+      tenant_id:
+        type: integer
+      updated_at:
+        type: string
+    type: object
+  domain.Tenant:
+    properties:
+      businessName:
+        type: string
+      createdAt:
+        type: string
+      id:
+        type: integer
+      status:
+        type: string
+      subdomain:
+        type: string
+      updatedAt:
+        type: string
+    type: object
+  domain.TenantRequestBody:
+    properties:
+      business_name:
+        type: string
+      email:
+        type: string
+      first_name:
+        type: string
+      last_name:
+        type: string
+      password:
+        type: string
+      subdomain:
+        type: string
+    type: object
+  http.TenantSignupResponse:
+    properties:
+      admin:
+        $ref: '#/definitions/domain.PublicUser'
+      message:
+        type: string
+      tenant:
+        $ref: '#/definitions/domain.Tenant'
+    type: object
 info:
   contact: {}
   description: A multi-tenant rest api for managing gym operations.
   title: Gymulty API Documentation
-paths: {}
+paths:
+  /api/tenants/signup:
+    post:
+      consumes:
+      - application/json
+      description: |-
+        Sign up for a new tenant account. This creates a new tenant account along
+        with an admin user that manages the all operations for this tenant
+      parameters:
+      - description: The tenant request body
+        in: body
+        name: Tenant
+        required: true
+        schema:
+          $ref: '#/definitions/domain.TenantRequestBody'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/http.TenantSignupResponse'
+      summary: Create a tenant
+      tags:
+      - tenants
 swagger: "2.0"

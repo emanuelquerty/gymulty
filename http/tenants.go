@@ -31,6 +31,16 @@ func (t *TenantHandler) registerRoutes(router *http.ServeMux) {
 	router.Handle("POST /api/tenants/signup", errorHandler(t.createTenant))
 }
 
+// CreateTenant godoc
+// @Summary Create a tenant
+// @Description Sign up for a new tenant account. This creates a new tenant account along
+// @Description with an admin user that manages the all operations for this tenant
+// @Tags tenants
+// @Accept json
+// @Produce json
+// @Param Tenant body domain.TenantRequestBody true "The tenant request body"
+// @Success 200               {object}            TenantSignupResponse
+// @Router /api/tenants/signup [post]
 func (t *TenantHandler) createTenant(w http.ResponseWriter, r *http.Request) *appError {
 	var body domain.TenantRequestBody
 	json.NewDecoder(r.Body).Decode(&body)

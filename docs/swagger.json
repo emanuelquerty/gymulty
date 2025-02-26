@@ -5,5 +5,128 @@
         "title": "Gymulty API Documentation",
         "contact": {}
     },
-    "paths": {}
+    "paths": {
+        "/api/tenants/signup": {
+            "post": {
+                "description": "Sign up for a new tenant account. This creates a new tenant account along\nwith an admin user that manages the all operations for this tenant",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "tenants"
+                ],
+                "summary": "Create a tenant",
+                "parameters": [
+                    {
+                        "description": "The tenant request body",
+                        "name": "Tenant",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/domain.TenantRequestBody"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/http.TenantSignupResponse"
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "definitions": {
+        "domain.PublicUser": {
+            "type": "object",
+            "properties": {
+                "created_at": {
+                    "type": "string"
+                },
+                "first_name": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "last_name": {
+                    "type": "string"
+                },
+                "role": {
+                    "type": "string"
+                },
+                "tenant_id": {
+                    "type": "integer"
+                },
+                "updated_at": {
+                    "type": "string"
+                }
+            }
+        },
+        "domain.Tenant": {
+            "type": "object",
+            "properties": {
+                "businessName": {
+                    "type": "string"
+                },
+                "createdAt": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "status": {
+                    "type": "string"
+                },
+                "subdomain": {
+                    "type": "string"
+                },
+                "updatedAt": {
+                    "type": "string"
+                }
+            }
+        },
+        "domain.TenantRequestBody": {
+            "type": "object",
+            "properties": {
+                "business_name": {
+                    "type": "string"
+                },
+                "email": {
+                    "type": "string"
+                },
+                "first_name": {
+                    "type": "string"
+                },
+                "last_name": {
+                    "type": "string"
+                },
+                "password": {
+                    "type": "string"
+                },
+                "subdomain": {
+                    "type": "string"
+                }
+            }
+        },
+        "http.TenantSignupResponse": {
+            "type": "object",
+            "properties": {
+                "admin": {
+                    "$ref": "#/definitions/domain.PublicUser"
+                },
+                "message": {
+                    "type": "string"
+                },
+                "tenant": {
+                    "$ref": "#/definitions/domain.Tenant"
+                }
+            }
+        }
+    }
 }
