@@ -1,0 +1,9 @@
+{
+    "swagger": "2.0",
+    "info": {
+        "description": "A multi-tenant rest api for managing gym operations.",
+        "title": "Gymulty API Documentation",
+        "contact": {}
+    },
+    "paths": {}
+}

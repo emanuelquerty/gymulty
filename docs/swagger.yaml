@@ -1,0 +1,6 @@
+info:
+  contact: {}
+  description: A multi-tenant rest api for managing gym operations.
+  title: Gymulty API Documentation
+paths: {}
+swagger: "2.0"

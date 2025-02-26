@@ -5,12 +5,16 @@ import (
 	"log/slog"
 	"net/http"
 
+	_ "github.com/emanuelquerty/gymulty/docs"
 	"github.com/emanuelquerty/gymulty/domain"
 	"github.com/emanuelquerty/gymulty/http/middleware"
 	"github.com/emanuelquerty/gymulty/postgres"
 	"github.com/jackc/pgx/v5/pgxpool"
+	httpSwagger "github.com/swaggo/http-swagger/v2"
 )
 
+// @title Gymulty API Documentation
+// @description A multi-tenant rest api for managing gym operations.
 type Server struct {
 	router      http.Handler
 	logger      *slog.Logger
@@ -36,6 +40,10 @@ func (s *Server) registerRoutes(router *http.ServeMux) {
 	tenantHandler := NewTenantHandler(s.logger, s.store)
 	userHandler := NewUserHandler(s.logger, s.store)
 	classHandler := NewClassHandler(s.logger, s.store)
+
+	swaggerHandler := httpSwagger.Handler(httpSwagger.URL("http://localhost:8080/api/swagger/doc.json"))
+
+	router.Handle("/api/swagger/*", swaggerHandler)
 
 	router.Handle("/api/tenants/", tenantHandler)
 	router.Handle("/api/tenants/{tenantID}/users/", userHandler)
