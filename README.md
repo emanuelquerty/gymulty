@@ -66,4 +66,4 @@ This will spin up the api server on `port 8080`
 
 ### Documentation
 
-Once the server is running You can access the API Documentation on [http://localhost:8080/api/swagger/index.html](http://localhost:8080/api/swagger/index.html) to interact with the API via swagger UI.
+Once the server is running, you can access the full API Documentation on [http://localhost:8080/api/swagger/index.html](http://localhost:8080/api/swagger/index.html) to interact with the API via swagger UI or your tool of choice.
