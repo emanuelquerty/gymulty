@@ -14,11 +14,13 @@ git clone https://github.com/emanuelquerty/gymulty.git
 
 ### Download all dependencies
 
-Open the project in your editor of choice and run the following command in the terminal:
+First make sure you have [Go](https://go.dev/doc/install) installed in your local computer. If not, you can download it by going to [https://go.dev/doc/install](https://go.dev/doc/install) and following the installation process. Once that is done, open the project you've just cloned in your editor of choice and run the following command in the terminal:
 
 ```cmd
 go get
 ```
+
+This will add all required dependencies and install them.
 
 ### Environment variables
 
@@ -32,7 +34,7 @@ DB_USERNAME=postgres
 DB_PASSWORD=YourPostgresPassword
 ```
 
-### Runn the project
+### Run the project
 
 ```cmd
 go run ./cmd/http/.
