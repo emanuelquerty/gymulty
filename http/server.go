@@ -13,8 +13,8 @@ import (
 	httpSwagger "github.com/swaggo/http-swagger/v2"
 )
 
-// @title Gymulty API Documentation
-// @description A multi-tenant rest api for managing gym operations.
+// @title			Gymulty API Documentation
+// @description	A multi-tenant rest api for managing gym operations.
 type Server struct {
 	router      http.Handler
 	logger      *slog.Logger
@@ -46,7 +46,9 @@ func (s *Server) registerRoutes(router *http.ServeMux) {
 	router.Handle("/api/swagger/*", swaggerHandler)
 
 	router.Handle("/api/tenants/", tenantHandler)
+	router.Handle("/api/tenants/{tenantID}/users", userHandler)
 	router.Handle("/api/tenants/{tenantID}/users/", userHandler)
+	router.Handle("/api/tenants/{tenantID}/classes", classHandler)
 	router.Handle("/api/tenants/{tenantID}/classes/", classHandler)
 }
 

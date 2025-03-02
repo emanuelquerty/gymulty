@@ -37,6 +37,20 @@ func (u *UserHandler) registerRoutes(router *http.ServeMux) {
 	router.Handle("GET /api/tenants/{tenantID}/users", errorHandler(u.getAllUsers))
 }
 
+// GetUserByID godoc
+//
+//	@Summary		Get a user by ID
+//	@Description	Get a user by ID
+//	@Tags			users
+//	@Accept			json
+//	@Produce		json
+//	@Param			tenantID	path		int	true	"The tenant ID"
+//	@Param			userID		path		int	true	"The user ID"
+//	@Success		200			{object}	Response[[]domain.PublicUser]
+//	@Failure		500			{object}	appError
+//	@Failure		404			{object}	appError
+//	@Failure		400			{object}	appError
+//	@Router			/api/tenants/{tenantID}/users/{userID} [get]
 func (u *UserHandler) getUserByID(w http.ResponseWriter, r *http.Request) *appError {
 	e := &appError{Logger: u.logger}
 	userID, err := strconv.Atoi(r.PathValue("userID"))
@@ -66,6 +80,22 @@ func (u *UserHandler) getUserByID(w http.ResponseWriter, r *http.Request) *appEr
 	return nil
 }
 
+// CreateUser godoc
+//
+//	@Summary		Create a user
+//	@Description	Create a new user for a given tenant with id. For the request body, only the following fields are required:
+//	@Description	tenant_id, first_name, last_name, email, password
+//	@Tags			users
+//	@Accept			json
+//	@Produce		json
+//	@Param			tenantID	path		int			true	"The tenant ID"
+//	@Param			User		body		domain.User	true	"the request body"
+//	@Success		201			{object}	Response[[]domain.PublicUser]
+//	@Failure		500			{object}	appError
+//	@Failure		409			{object}	appError
+//	@Failure		404			{object}	appError
+//	@Failure		400			{object}	appError
+//	@Router			/api/tenants/{tenantID}/users [post]
 func (u *UserHandler) createUser(w http.ResponseWriter, r *http.Request) *appError {
 	e := &appError{Logger: u.logger}
 
