@@ -170,6 +170,20 @@ func (u *UserHandler) updateUser(w http.ResponseWriter, r *http.Request) *appErr
 	return nil
 }
 
+// DeleteUser godoc
+//
+//	@Summary		Delete user by id
+//	@Description	Deletes a user by id returnning 204 status code on success
+//	@Tags			users
+//	@Accept			json
+//	@Produce		json
+//	@Param			tenantID	path		int			true	"The tenant ID"
+//	@Param			userID		path		int	         true	"The user ID"
+//	@Success		204
+//	@Failure		500			{object}	appError
+//	@Failure		404			{object}	appError
+//	@Failure		400			{object}	appError
+//	@Router			/api/tenants/{tenantID}/users/{userID} [delete]
 func (u *UserHandler) deleteUserByID(w http.ResponseWriter, r *http.Request) *appError {
 	e := &appError{Logger: u.logger}
 	userID, err := strconv.Atoi(r.PathValue("userID"))
