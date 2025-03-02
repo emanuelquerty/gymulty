@@ -210,6 +210,19 @@ func (u *UserHandler) deleteUserByID(w http.ResponseWriter, r *http.Request) *ap
 	return nil
 }
 
+// GetAllUsers godoc
+//
+//	@Summary		Fetch all users
+//	@Description	Fetches all users returning a collection
+//	@Tags			users
+//	@Accept			json
+//	@Produce		json
+//	@Param			tenantID	path		int			true	"The tenant ID"
+//	@Success		200  		{object}	Response[[]domain.PublicUser]
+//	@Failure		500			{object}	appError
+//	@Failure		404			{object}	appError
+//	@Failure		400			{object}	appError
+//	@Router			/api/tenants/{tenantID}/users  [get]
 func (u *UserHandler) getAllUsers(w http.ResponseWriter, r *http.Request) *appError {
 	e := &appError{Logger: u.logger}
 	tenantID, err := strconv.Atoi(r.PathValue("tenantID"))

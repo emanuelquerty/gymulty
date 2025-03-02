@@ -53,6 +53,54 @@
             }
         },
         "/api/tenants/{tenantID}/users": {
+            "get": {
+                "description": "Fetches all users returning a collection",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "users"
+                ],
+                "summary": "Fetch all users",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "The tenant ID",
+                        "name": "tenantID",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/http.Response-array_domain_PublicUser"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/http.appError"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/http.appError"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/http.appError"
+                        }
+                    }
+                }
+            },
             "post": {
                 "description": "Create a new user for a given tenant with id. For the request body, only the following fields are required:\ntenant_id, first_name, last_name, email, password",
                 "consumes": [

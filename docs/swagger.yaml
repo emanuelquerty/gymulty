@@ -99,6 +99,38 @@ info:
   title: Gymulty API Documentation
 paths:
   /api/tenants/{tenantID}/users:
+    get:
+      consumes:
+      - application/json
+      description: Fetches all users returning a collection
+      parameters:
+      - description: The tenant ID
+        in: path
+        name: tenantID
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/http.Response-array_domain_PublicUser'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/http.appError'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/http.appError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/http.appError'
+      summary: Fetch all users
+      tags:
+      - users
     post:
       consumes:
       - application/json
