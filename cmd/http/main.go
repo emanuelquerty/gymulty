@@ -42,6 +42,7 @@ func main() {
 	server.Use(middleware.Logger)
 	server.Use(middleware.SetHeader("Content-Type", "application/json"))
 	server.Use(middleware.AddRequestID)
+	server.Use(middleware.CORS)
 
 	err = server.ListenAndServe(8080)
 	if err != nil {

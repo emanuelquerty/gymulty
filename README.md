@@ -6,15 +6,25 @@ Note: This api is still in early stages and updates will be added as they are re
 
 ## Getting started locally
 
+### Download the project
+
+```cmd
+git clone https://github.com/emanuelquerty/gymulty.git
+```
+
 ### Download all dependencies
+
+First make sure you have [Go](https://go.dev/doc/install) installed in your local computer. If not, you can download it by going to [https://go.dev/doc/install](https://go.dev/doc/install) and following the installation process. Once that is done, open the project you've just cloned in your editor of choice and run the following command in the terminal:
 
 ```cmd
 go get
 ```
 
-### Env
+This will add all required dependencies and install them.
 
-Create a .env file in the root of the project with the following configs:
+### Environment variables
+
+Create a `.env` file in the root of the project with the following configuration variables:
 
 ```cmd
 DB_HOST=localhost
@@ -24,13 +34,13 @@ DB_USERNAME=postgres
 DB_PASSWORD=YourPostgresPassword
 ```
 
-### Run
+### Run the project
 
 ```cmd
-go run cmd/http/server.go
+go run ./cmd/http/.
 ```
 
-You can also navigate to `cmd/http` directory and run `go run server.go`
+This will start a server listening on port `8080`
 
 ### Run tests
 
@@ -44,14 +54,18 @@ go test ./...
 go build -o gymulty ./cmd/http
 ```
 
-The command above will build the executable with name ```gymulty```
+This will build the executable named `gymulty` on the project root directory.
 
-Finally, run the executable:
+### Start the server
+
+Run the generated executable:
 
 ```cmd
 ./gymulty
 ```
 
-This will spin up the api server on ```port 8080```
+This will spin up the api server on `port 8080`
 
-API documentation will be available soon!!!
+### Documentation
+
+Once the server is running, you can access the full API Documentation on [http://localhost:8080/api/swagger/index.html](http://localhost:8080/api/swagger/index.html) to interact with the API via swagger UI or your tool of choice.

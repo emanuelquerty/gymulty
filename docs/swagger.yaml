@@ -1,0 +1,504 @@
+definitions:
+  domain.Class:
+    properties:
+      capacity:
+        type: integer
+      created_at:
+        type: string
+      description:
+        type: string
+      ends_at:
+        type: string
+      id:
+        type: integer
+      name:
+        type: string
+      starts_at:
+        type: string
+      tenant_id:
+        type: integer
+      trainer_id:
+        type: integer
+      updated_at:
+        type: string
+    type: object
+  domain.PublicUser:
+    properties:
+      created_at:
+        type: string
+      first_name:
+        type: string
+      id:
+        type: integer
+      last_name:
+        type: string
+      role:
+        type: string
+      tenant_id:
+        type: integer
+      updated_at:
+        type: string
+    type: object
+  domain.Tenant:
+    properties:
+      businessName:
+        type: string
+      createdAt:
+        type: string
+      id:
+        type: integer
+      status:
+        type: string
+      subdomain:
+        type: string
+      updatedAt:
+        type: string
+    type: object
+  domain.TenantRequestBody:
+    properties:
+      business_name:
+        type: string
+      email:
+        type: string
+      first_name:
+        type: string
+      last_name:
+        type: string
+      password:
+        type: string
+      subdomain:
+        type: string
+    type: object
+  domain.User:
+    properties:
+      created_at:
+        type: string
+      email:
+        type: string
+      first_name:
+        type: string
+      id:
+        type: integer
+      last_name:
+        type: string
+      password:
+        type: string
+      role:
+        type: string
+      tenant_id:
+        type: integer
+      updated_at:
+        type: string
+    type: object
+  http.Response-array_domain_Class:
+    properties:
+      count:
+        type: integer
+      data:
+        items:
+          $ref: '#/definitions/domain.Class'
+        type: array
+    type: object
+  http.Response-array_domain_PublicUser:
+    properties:
+      count:
+        type: integer
+      data:
+        items:
+          $ref: '#/definitions/domain.PublicUser'
+        type: array
+    type: object
+  http.TenantSignupResponse:
+    properties:
+      admin:
+        $ref: '#/definitions/domain.PublicUser'
+      message:
+        type: string
+      tenant:
+        $ref: '#/definitions/domain.Tenant'
+    type: object
+  http.appError:
+    properties:
+      code:
+        type: string
+      error: {}
+      message:
+        type: string
+    type: object
+info:
+  contact: {}
+  description: A multi-tenant rest api for managing gym operations.
+  title: Gymulty API Documentation
+paths:
+  /api/tenants/{tenantID}/classes:
+    get:
+      consumes:
+      - application/json
+      description: Fetches all classes for a given tenant
+      parameters:
+      - description: The tenant ID
+        in: path
+        name: tenantID
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/http.Response-array_domain_Class'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/http.appError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/http.appError'
+      summary: Fetch all classes
+      tags:
+      - classes
+    post:
+      consumes:
+      - application/json
+      description: Creates a new class
+      parameters:
+      - description: The tenant ID
+        in: path
+        name: tenantID
+        required: true
+        type: integer
+      - description: The request body
+        in: body
+        name: class
+        required: true
+        schema:
+          $ref: '#/definitions/domain.Class'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/http.Response-array_domain_Class'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/http.appError'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/http.appError'
+        "409":
+          description: Conflict
+          schema:
+            $ref: '#/definitions/http.appError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/http.appError'
+      summary: Create new class
+      tags:
+      - classes
+  /api/tenants/{tenantID}/classes/{classID}:
+    delete:
+      consumes:
+      - application/json
+      description: Delete a class by id
+      parameters:
+      - description: The tenant ID
+        in: path
+        name: tenantID
+        required: true
+        type: integer
+      - description: The class ID
+        in: path
+        name: classID
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/http.appError'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/http.appError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/http.appError'
+      summary: Delete class by id
+      tags:
+      - classes
+    get:
+      consumes:
+      - application/json
+      description: Fetches a class by its id
+      parameters:
+      - description: The tenant ID
+        in: path
+        name: tenantID
+        required: true
+        type: integer
+      - description: The class ID
+        in: path
+        name: classID
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/http.Response-array_domain_Class'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/http.appError'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/http.appError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/http.appError'
+      summary: Get class by id
+      tags:
+      - classes
+  /api/tenants/{tenantID}/users:
+    get:
+      consumes:
+      - application/json
+      description: Fetches all users returning a collection
+      parameters:
+      - description: The tenant ID
+        in: path
+        name: tenantID
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/http.Response-array_domain_PublicUser'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/http.appError'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/http.appError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/http.appError'
+      summary: Fetch all users
+      tags:
+      - users
+    post:
+      consumes:
+      - application/json
+      description: |-
+        Create a new user for a given tenant with id. For the request body, only the following fields are required:
+        tenant_id, first_name, last_name, email, password
+      parameters:
+      - description: The tenant ID
+        in: path
+        name: tenantID
+        required: true
+        type: integer
+      - description: the request body
+        in: body
+        name: User
+        required: true
+        schema:
+          $ref: '#/definitions/domain.User'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/http.Response-array_domain_PublicUser'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/http.appError'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/http.appError'
+        "409":
+          description: Conflict
+          schema:
+            $ref: '#/definitions/http.appError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/http.appError'
+      summary: Create a user
+      tags:
+      - users
+  /api/tenants/{tenantID}/users/{userID}:
+    delete:
+      consumes:
+      - application/json
+      description: Deletes a user by id returnning 204 status code on success
+      parameters:
+      - description: The tenant ID
+        in: path
+        name: tenantID
+        required: true
+        type: integer
+      - description: The user ID
+        in: path
+        name: userID
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/http.appError'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/http.appError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/http.appError'
+      summary: Delete user by id
+      tags:
+      - users
+    get:
+      consumes:
+      - application/json
+      description: Get a user by ID
+      parameters:
+      - description: The tenant ID
+        in: path
+        name: tenantID
+        required: true
+        type: integer
+      - description: The user ID
+        in: path
+        name: userID
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/http.Response-array_domain_PublicUser'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/http.appError'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/http.appError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/http.appError'
+      summary: Get a user by ID
+      tags:
+      - users
+    put:
+      consumes:
+      - application/json
+      description: Updates a user by id. The body can take 1 or more fields to update.
+        This means that only the fields to update should be included in the request
+        body
+      parameters:
+      - description: The tenant ID
+        in: path
+        name: tenantID
+        required: true
+        type: integer
+      - description: The user ID
+        in: path
+        name: userID
+        required: true
+        type: integer
+      - description: The request body
+        in: body
+        name: user
+        required: true
+        schema:
+          $ref: '#/definitions/domain.User'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/http.Response-array_domain_PublicUser'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/http.appError'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/http.appError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/http.appError'
+      summary: Update user by id
+      tags:
+      - users
+  /api/tenants/signup:
+    post:
+      consumes:
+      - application/json
+      description: |-
+        Sign up for a new tenant account. This creates a new tenant account along
+        with an admin user that manages the all operations for this tenant
+      parameters:
+      - description: The tenant request body
+        in: body
+        name: Tenant
+        required: true
+        schema:
+          $ref: '#/definitions/domain.TenantRequestBody'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/http.TenantSignupResponse'
+        "409":
+          description: Conflict
+          schema:
+            $ref: '#/definitions/http.appError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/http.appError'
+      summary: Create a tenant
+      tags:
+      - tenants
+swagger: "2.0"
