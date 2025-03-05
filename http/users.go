@@ -131,6 +131,21 @@ func (u *UserHandler) createUser(w http.ResponseWriter, r *http.Request) *appErr
 	return nil
 }
 
+// UpdateUser godoc
+//
+//	@Summary		Update user by id
+//	@Description	Updates a user by id. The body can take 1 or more fields to update. This means that only the fields to update should be included in the request body
+//	@Tags			users
+//	@Accept			json
+//	@Produce		json
+//	@Param			tenantID	path		int			   true	      "The tenant ID"
+//	@Param			userID		path		int	           true	      "The user ID"
+//	@Param			user		body		domain.User	   true       "The request body"
+//	@Success		200         {object}	Response[[]domain.PublicUser]
+//	@Failure		500			{object}	appError
+//	@Failure		404			{object}	appError
+//	@Failure		400			{object}	appError
+//	@Router			/api/tenants/{tenantID}/users/{userID} [put]
 func (u *UserHandler) updateUser(w http.ResponseWriter, r *http.Request) *appError {
 	e := &appError{Logger: u.logger}
 	userID, err := strconv.Atoi(r.PathValue("userID"))

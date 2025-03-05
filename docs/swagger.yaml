@@ -248,6 +248,51 @@ paths:
       summary: Get a user by ID
       tags:
       - users
+    put:
+      consumes:
+      - application/json
+      description: Updates a user by id. The body can take 1 or more fields to update.
+        This means that only the fields to update should be included in the request
+        body
+      parameters:
+      - description: The tenant ID
+        in: path
+        name: tenantID
+        required: true
+        type: integer
+      - description: The user ID
+        in: path
+        name: userID
+        required: true
+        type: integer
+      - description: The request body
+        in: body
+        name: user
+        required: true
+        schema:
+          $ref: '#/definitions/domain.User'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/http.Response-array_domain_PublicUser'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/http.appError'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/http.appError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/http.appError'
+      summary: Update user by id
+      tags:
+      - users
   /api/tenants/signup:
     post:
       consumes:
