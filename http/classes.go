@@ -36,6 +36,21 @@ func (c *ClassHandler) registerRoutes(router *http.ServeMux) {
 	router.Handle("GET /api/tenants/{tenantID}/classes", errorHandler(c.GetAllClasses))
 }
 
+// CreateClass godoc
+//
+//	@Summary		Create new class
+//	@Description	Creates a new class
+//	@Tags			classes
+//	@Accept			json
+//	@Produce		json
+//	@Param			tenantID	path		int			       true	      "The tenant ID"
+//	@Param			class		body		domain.Class	   true       "The request body"
+//	@Success		200         {object}	Response[[]domain.Class]
+//	@Failure		500			{object}	appError
+//	@Failure		409			{object}	appError
+//	@Failure		404			{object}	appError
+//	@Failure		400			{object}	appError
+//	@Router			/api/tenants/{tenantID}/classes   [post]
 func (c *ClassHandler) CreateClass(w http.ResponseWriter, r *http.Request) *appError {
 	e := appError{Logger: c.logger}
 
@@ -64,6 +79,20 @@ func (c *ClassHandler) CreateClass(w http.ResponseWriter, r *http.Request) *appE
 	return nil
 }
 
+// GetClassByID godoc
+//
+//	@Summary		Get class by id
+//	@Description	Fetches a class by its id
+//	@Tags			classes
+//	@Accept			json
+//	@Produce		json
+//	@Param			tenantID	path		int			       true	      "The tenant ID"
+//	@Param			classID	    path		int			       true	      "The class ID"
+//	@Success		200         {object}	Response[[]domain.Class]
+//	@Failure		500			{object}	appError
+//	@Failure		404			{object}	appError
+//	@Failure		400			{object}	appError
+//	@Router			/api/tenants/{tenantID}/classes/{classID}   [get]
 func (c *ClassHandler) GetClassByID(w http.ResponseWriter, r *http.Request) *appError {
 	e := appError{Logger: c.logger}
 
@@ -91,6 +120,20 @@ func (c *ClassHandler) GetClassByID(w http.ResponseWriter, r *http.Request) *app
 	return nil
 }
 
+// DeleteClassByID godoc
+//
+//	@Summary		Delete class by id
+//	@Description	Delete a class by id
+//	@Tags			classes
+//	@Accept			json
+//	@Produce		json
+//	@Param			tenantID	path		int			       true	      "The tenant ID"
+//	@Param			classID	    path		int			       true	      "The class ID"
+//	@Success		204
+//	@Failure		500			{object}	appError
+//	@Failure		404			{object}	appError
+//	@Failure		400			{object}	appError
+//	@Router			/api/tenants/{tenantID}/classes/{classID}   [delete]
 func (c *ClassHandler) DeleteClassByID(w http.ResponseWriter, r *http.Request) *appError {
 	e := appError{Logger: c.logger}
 
@@ -113,6 +156,18 @@ func (c *ClassHandler) DeleteClassByID(w http.ResponseWriter, r *http.Request) *
 	return nil
 }
 
+// GetAll classes godoc
+//
+//	@Summary		Fetch all classes
+//	@Description	Fetches all classes for a given tenant
+//	@Tags			classes
+//	@Accept			json
+//	@Produce		json
+//	@Param			tenantID	path		int			       true	      "The tenant ID"
+//	@Success		200         {object}	Response[[]domain.Class]
+//	@Failure		500			{object}	appError
+//	@Failure		400			{object}	appError
+//	@Router			/api/tenants/{tenantID}/classes   [get]
 func (c *ClassHandler) GetAllClasses(w http.ResponseWriter, r *http.Request) *appError {
 	e := appError{Logger: c.logger}
 

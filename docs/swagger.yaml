@@ -1,4 +1,27 @@
 definitions:
+  domain.Class:
+    properties:
+      capacity:
+        type: integer
+      created_at:
+        type: string
+      description:
+        type: string
+      ends_at:
+        type: string
+      id:
+        type: integer
+      name:
+        type: string
+      starts_at:
+        type: string
+      tenant_id:
+        type: integer
+      trainer_id:
+        type: integer
+      updated_at:
+        type: string
+    type: object
   domain.PublicUser:
     properties:
       created_at:
@@ -67,6 +90,15 @@ definitions:
       updated_at:
         type: string
     type: object
+  http.Response-array_domain_Class:
+    properties:
+      count:
+        type: integer
+      data:
+        items:
+          $ref: '#/definitions/domain.Class'
+        type: array
+    type: object
   http.Response-array_domain_PublicUser:
     properties:
       count:
@@ -98,6 +130,150 @@ info:
   description: A multi-tenant rest api for managing gym operations.
   title: Gymulty API Documentation
 paths:
+  /api/tenants/{tenantID}/classes:
+    get:
+      consumes:
+      - application/json
+      description: Fetches all classes for a given tenant
+      parameters:
+      - description: The tenant ID
+        in: path
+        name: tenantID
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/http.Response-array_domain_Class'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/http.appError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/http.appError'
+      summary: Fetch all classes
+      tags:
+      - classes
+    post:
+      consumes:
+      - application/json
+      description: Creates a new class
+      parameters:
+      - description: The tenant ID
+        in: path
+        name: tenantID
+        required: true
+        type: integer
+      - description: The request body
+        in: body
+        name: class
+        required: true
+        schema:
+          $ref: '#/definitions/domain.Class'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/http.Response-array_domain_Class'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/http.appError'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/http.appError'
+        "409":
+          description: Conflict
+          schema:
+            $ref: '#/definitions/http.appError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/http.appError'
+      summary: Create new class
+      tags:
+      - classes
+  /api/tenants/{tenantID}/classes/{classID}:
+    delete:
+      consumes:
+      - application/json
+      description: Delete a class by id
+      parameters:
+      - description: The tenant ID
+        in: path
+        name: tenantID
+        required: true
+        type: integer
+      - description: The class ID
+        in: path
+        name: classID
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/http.appError'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/http.appError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/http.appError'
+      summary: Delete class by id
+      tags:
+      - classes
+    get:
+      consumes:
+      - application/json
+      description: Fetches a class by its id
+      parameters:
+      - description: The tenant ID
+        in: path
+        name: tenantID
+        required: true
+        type: integer
+      - description: The class ID
+        in: path
+        name: classID
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/http.Response-array_domain_Class'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/http.appError'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/http.appError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/http.appError'
+      summary: Get class by id
+      tags:
+      - classes
   /api/tenants/{tenantID}/users:
     get:
       consumes:
